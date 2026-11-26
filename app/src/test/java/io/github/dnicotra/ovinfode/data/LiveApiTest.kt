@@ -1,5 +1,6 @@
 package io.github.dnicotra.ovinfode.data
 
+import io.github.dnicotra.ovinfode.country.Italy
 import io.github.dnicotra.ovinfode.country.Netherlands
 import io.github.dnicotra.ovinfode.country.country
 import io.github.dnicotra.ovinfode.data.api.TransitousApi
@@ -168,6 +169,66 @@ class LiveApiTest {
         assertTrue("too few stops", trip.stops.size >= 2)
         assertTrue("origin stop not found", indexOfStop(trip.stops, departure.stopId, departure.stopName) >= 0)
         assertTrue("no platforms", trip.stops.any { it.platform != null })
+    }
+
+    @Test
+    fun `italian departure boards read the Italian way and need no town lookups`() = runBlocking {
+        val problems = mutableListOf<String>()
+        val stations = listOf(
+            "Roma Termini", "Milano Centrale", "Napoli Centrale", "Torino Porta Nuova", "Bologna Centrale",
+            "Venezia Santa Lucia", "Milano Cadorna", "Duomo M3", "Bolzano, NOI",
+        )
+        // Four capitals in a row: a name the rules missed (abbreviations like "FS" or "GTT" are shorter).
+        val shouting = Regex("""\p{Lu}{4,}""")
+        for (query in stations) {
+            val stop = repository.searchStops(query, near = null).firstOrNull()
+            if (stop == null || stop.country() != Italy) {
+                problems += "$query: found ${stop?.name} (${stop?.id}, ${stop?.country()})"
+                continue
+            }
+            val before = townLookups.get()
+            val departures = repository.departures(stop, count = 30).departures
+            val lookups = townLookups.get() - before
+            val realtime = if (departures.isEmpty()) 0 else departures.count { it.isRealtime } * 100 / departures.size
+            println(String.format("%-36s %3d departures  %3d%% real-time  %2d lookups  lines %s", stop.name.take(36), departures.size, realtime,
+                lookups, departures.map { it.line.name }.distinct().take(14)))
+            println("    " + departures.map { it.headsign }.distinct().take(12).joinToString(" | "))
+            if (shouting.containsMatchIn(stop.name)) problems += "stop name '${stop.name}'"
+            if (departures.isEmpty()) problems += "${stop.name}: no departures"
+            // Only destinations abroad (FlixBus to Lyon from Napoli Centrale) may need one.
+            val abroad = departures.mapNotNull { it.destination }.filter { it.country() != Italy }.distinctBy { it.name }
+            if (lookups > abroad.size) problems += "${stop.name}: $lookups town lookups for ${abroad.map { it.name }}"
+            departures.filter { it.headsign.isBlank() }.forEach { problems += "${stop.name}: ${it.line.name} has no destination" }
+            departures.filter { shouting.containsMatchIn(it.headsign) && it.destination?.country() == Italy }
+                .forEach { problems += "${stop.name}: ${it.line.name} → '${it.headsign}' (${it.tripId})" }
+            // The same train twice at the same time (Trenitalia's outdated copies). The timetable also has trains
+            // twice at different times, both current (IC 503 to Savona at 04:40 and 06:05 on 2026-11-27): left as they are.
+            departures.filter { it.line.mode.isRail && it.tripNumber != null }.groupBy { Triple(it.tripNumber, it.headsign, it.scheduled) }
+                .filter { it.value.size > 1 }
+                .forEach { (key, same) -> problems += "${stop.name}: train ${key.first} shown ${same.size} times (${same.map { it.line.name }})" }
+        }
+        assertTrue(problems.joinToString("\n"), problems.isEmpty())
+    }
+
+    @Test
+    fun `italian train trip opens with its stops`() = runBlocking {
+        val stop = repository.searchStops("Roma Termini", near = null).first()
+        val departure = repository.departures(stop, count = 40).departures
+            .firstOrNull { it.line.mode == TransportMode.LONG_DISTANCE && !it.cancelled }
+        assumeTrue("no long-distance train right now", departure != null)
+        departure!!
+        val trip = repository.trip(departure.tripId, contextStopId = departure.stopId)
+        println("${trip.line.name} ${trip.tripNumber} → ${trip.headsign}: " + trip.stops.joinToString(" – ") { it.name })
+        assertTrue("too few stops", trip.stops.size >= 2)
+        assertTrue("origin stop not found", indexOfStop(trip.stops, departure.stopId, departure.stopName) >= 0)
+        assertTrue("stop names in capitals", trip.stops.none { it.name == it.name.uppercase() })
+    }
+
+    @Test
+    fun `nearby stops around Milan cathedral`() = runBlocking {
+        val nearby = repository.nearbyStops(LatLon(45.4642, 9.1900))
+        println("nearby: " + nearby.joinToString { "${it.stop.name} ${it.distanceMeters} m" })
+        assertTrue(nearby.any { it.stop.name.startsWith("Duomo") })
     }
 
     @Test
