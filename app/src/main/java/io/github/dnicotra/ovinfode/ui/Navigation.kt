@@ -1,18 +1,9 @@
 package io.github.dnicotra.ovinfode.ui
 
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.core.FastOutLinearInEasing
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -76,34 +67,20 @@ private fun NavController.backSafely() {
     if (currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) popBackStack()
 }
 
-/*
- * Material "shared axis X" motion: screens slide a short distance horizontally while the old one
- * fades out quickly and the new one fades in afterwards, so the two never show through each other.
- * Back is the exact mirror of forward, which also makes the predictive back gesture look natural.
- */
-private const val MOTION_MILLIS = 300
-private const val FADE_OUT_MILLIS = 90
-private val SLIDE_DISTANCE = 30.dp
-
-private fun sharedAxisEnter(offsetPx: Int): EnterTransition =
-    slideInHorizontally(tween(MOTION_MILLIS, easing = FastOutSlowInEasing)) { offsetPx } +
-        fadeIn(tween(MOTION_MILLIS - FADE_OUT_MILLIS, delayMillis = FADE_OUT_MILLIS, easing = LinearOutSlowInEasing))
-
-private fun sharedAxisExit(offsetPx: Int): ExitTransition =
-    slideOutHorizontally(tween(MOTION_MILLIS, easing = FastOutSlowInEasing)) { offsetPx } +
-        fadeOut(tween(FADE_OUT_MILLIS, easing = FastOutLinearInEasing))
-
 @Composable
 fun AppNavHost(container: AppContainer) {
     val nav = rememberNavController()
-    val slide = with(LocalDensity.current) { SLIDE_DISTANCE.roundToPx() }
+    val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val transitions = remember(rtl) { ScreenTransitions(rtl) }
     NavHost(
         navController = nav,
         startDestination = HomeRoute,
-        enterTransition = { sharedAxisEnter(slide) },
-        exitTransition = { sharedAxisExit(-slide) },
-        popEnterTransition = { sharedAxisEnter(-slide) },
-        popExitTransition = { sharedAxisExit(slide) },
+        enterTransition = transitions.enter,
+        exitTransition = transitions.exit,
+        popEnterTransition = transitions.popEnter,
+        popExitTransition = transitions.popExit,
+        predictivePopEnterTransition = transitions.predictivePopEnter,
+        predictivePopExitTransition = transitions.predictivePopExit,
     ) {
         composable<HomeRoute> {
             HomeScreen(
