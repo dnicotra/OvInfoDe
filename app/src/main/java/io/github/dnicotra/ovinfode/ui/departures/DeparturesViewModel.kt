@@ -3,12 +3,14 @@ package io.github.dnicotra.ovinfode.ui.departures
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.dnicotra.ovinfode.AppContainer
+import io.github.dnicotra.ovinfode.country.country
 import io.github.dnicotra.ovinfode.data.DepartureViewMode
 import io.github.dnicotra.ovinfode.data.model.Alert
 import io.github.dnicotra.ovinfode.data.model.Departure
 import io.github.dnicotra.ovinfode.data.model.ErrorKind
 import io.github.dnicotra.ovinfode.data.model.Stop
 import io.github.dnicotra.ovinfode.data.model.TransportMode
+import io.github.dnicotra.ovinfode.data.mergeSameTrains
 import io.github.dnicotra.ovinfode.data.safeCall
 import io.github.dnicotra.ovinfode.data.toErrorKind
 import kotlinx.coroutines.Job
@@ -44,6 +46,10 @@ data class DeparturesUiState(
     val availableModes: List<TransportMode> get() = departures.map { it.line.mode }.distinct().sorted()
     val visibleDepartures: List<Departure>
         get() = if (filter == null) departures else departures.filter { it.line.mode == filter }
+
+    /** Say that times are from the timetable where the country has no real-time data at all (Luxembourg). */
+    val timetableOnly: Boolean
+        get() = departures.isNotEmpty() && departures.none { it.isRealtime } && !stop.country().hasRealtimeData
 }
 
 /**
@@ -123,7 +129,11 @@ class DeparturesViewModel(
                     _state.update {
                         it.copy(
                             loadingMore = false,
-                            departures = (it.departures + result.departures).distinctBy { d -> Triple(d.tripId, d.line.name, d.scheduled) },
+                            // A train in two feeds can straddle the pages.
+                            departures = mergeSameTrains(
+                                (it.departures + result.departures).distinctBy { d -> Triple(d.tripId, d.line.name, d.scheduled) },
+                                it.stop.location,
+                            ),
                             nextPageCursor = result.nextPageCursor,
                         )
                     }

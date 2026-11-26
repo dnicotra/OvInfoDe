@@ -12,6 +12,9 @@ import io.github.dnicotra.ovinfode.data.toTrip
  * Real Transitous responses recorded on 2026-11-26: the German ones around 07:05 local time
  * (06:05 UTC), timetable data © DELFI e.V. and the respective operators; the Dutch ones
  * (amsterdam, utrecht, ic2735, iff) around 10:10 local time (09:10 UTC), data from OpenOV (CC0).
+ * The Luxembourg ones (luxembourg, lu_re5113) were recorded at 00:50 local time for the next
+ * morning from 08:30 (07:30 UTC), so without real-time data: timetables of the Administration
+ * des transports publics, DELFI e.V. and SNCF.
  */
 object Fixtures {
     fun text(name: String): String = requireNotNull(Fixtures::class.java.getResource("/fixtures/$name")) { "missing fixture $name" }.readText()
@@ -22,6 +25,7 @@ object Fixtures {
         "trip_s3.json", "trip_ice1697.json", "geocode_alexanderplatz.json", "mapstops_koeln.json",
         "stoptimes_amsterdam_centraal.json", "stoptimes_utrecht_centraal.json", "stoptimes_amsterdam_leidseplein.json",
         "trip_ic2735.json", "trip_iff_ic3531.json", "mapstops_amsterdam_dam.json",
+        "stoptimes_luxembourg_gare.json", "stoptimes_luxembourg_gare_tram.json", "trip_lu_re5113.json", "mapstops_luxembourg_gare.json",
     )
 
     fun stopTimes(name: String): StopDepartures =
@@ -33,6 +37,9 @@ object Fixtures {
 
     val amsterdam: StopDepartures get() = stopTimes("stoptimes_amsterdam_centraal.json")
     val utrecht: StopDepartures get() = stopTimes("stoptimes_utrecht_centraal.json")
+
+    /** Luxembourg station (the stop of the French feed, which groups the platforms of every feed). */
+    val luxembourg: StopDepartures get() = stopTimes("stoptimes_luxembourg_gare.json")
 
     fun trip(name: String, tripId: String, language: String = "en"): Trip =
         TransitousApi.json.decodeFromString<ItineraryDto>(text(name)).toTrip(tripId, language)

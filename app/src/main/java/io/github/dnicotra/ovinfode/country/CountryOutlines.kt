@@ -200,4 +200,14 @@ internal object CountryOutlines {
         qbuiI{wfo@~L~]maBpwBqCqzA
         """,
     )
+    /** 1 polygons, 75 points. */
+    val LU: List<String> = listOf(
+        """
+        {c|pHiyid@`_J`pBpBs}@h|AjpApkAqkB|fEiT|aKuvG}tAebAxnLswHbbDooKbbDyaB_`@}eEtdEofKdx@{pR`_IvFlyAd`AteC
+        owAqCjrA|jAs`@b`EhjMdwAz_B~fB}}AldMzbLfvT~`@_cAzaHouCxsH{w@x{IxXbfJnx@ug@hUz{EvnBpm@xmAfgCzaAd|U}qD|
+        tAelAptBylBphPwkFppH_qC_cHq`Bmz@wd@|hByzJ{yIywAza@gv@dtE{l@|TudDi}A}sApk@cp@jwGcbCtSs{DfrCyaBhzFafAz
+        `AaxCbn@a{AaeBec@`{@a{A_^~IacD}rC~lG}tK{oHgiBalF}tAocAmdAbdAguAaFmcBsqEqsDkGi|BueDwvDkq@kcE{kLehFq_C
+        aHadCmp@g_BvdCyaBh_@cxCecA{{G`q@woA`eDea@
+        """,
+    )
 }

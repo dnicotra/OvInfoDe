@@ -1,7 +1,10 @@
 package io.github.dnicotra.ovinfode.data
 
 import io.github.dnicotra.ovinfode.Fixtures
+import io.github.dnicotra.ovinfode.country.Germany
+import io.github.dnicotra.ovinfode.country.Luxembourg
 import io.github.dnicotra.ovinfode.country.Netherlands
+import io.github.dnicotra.ovinfode.country.country
 import io.github.dnicotra.ovinfode.data.api.MatchDto
 import io.github.dnicotra.ovinfode.data.api.StopTimesResponse
 import io.github.dnicotra.ovinfode.data.api.TransitousApi
@@ -190,6 +193,85 @@ class MappingTest {
         assertNull(extra.operator)
         assertEquals("Den Haag Laan v NOI", extra.stops.first().name)
         assertEquals("Venlo", extra.stops.last().name)
+    }
+
+    @Test
+    fun `luxembourg station shows each cross-border train once`() {
+        val departures = Fixtures.luxembourg.departures
+        val raw = TransitousApi.json.decodeFromString<StopTimesResponse>(Fixtures.text("stoptimes_luxembourg_gare.json")).stopTimes
+        assertEquals(40, raw.size)
+        // Seven trains are in two feeds: the German or French one and Luxembourg's.
+        assertEquals(33, departures.size)
+        assertTrue(departures.none { it.isRealtime })
+        val pairs = departures.filter { it.line.mode.isRail }.map { it.scheduled to it.tripNumber!!.trimStart('0').toLong() / 2 }
+        assertEquals("a train twice", pairs.size, pairs.distinct().size)
+
+        // German feed: "RE11" to the border at Wasserbillig. Luxembourg's: "RE" to Trier, kept.
+        val re = departures.single { it.scheduled == Instant.parse("2026-11-27T07:33:00Z") && it.line.name == "RE" }
+        assertEquals("Trier Hbf", re.headsign)
+        assertEquals("Chemins de Fer Luxembourgeois", re.operator)
+        assertTrue(re.tripId, re.tripId.contains("_lu-administration-des-transports-publics_"))
+
+        // Luxembourg's timetable has the TER 88521 only as far as Metz, the French one has the
+        // TER 88520 to Nancy: the French trip, under the Luxembourg name and stop name.
+        val ter = departures.single { it.scheduled == Instant.parse("2026-11-27T08:39:00Z") }
+        assertEquals("TER", ter.line.name)
+        assertEquals("Nancy", ter.headsign)
+        assertTrue(ter.tripId, ter.tripId.contains("_fr-horaires-sncf_"))
+        assertEquals("Luxembourg, Gare Centrale", ter.stopName)
+
+        val tgv = departures.single { it.scheduled == Instant.parse("2026-11-27T09:08:00Z") }
+        assertEquals("TGV", tgv.line.name)
+        assertEquals("high-speed in the French feed, regional rail in Luxembourg's", TransportMode.LONG_DISTANCE, tgv.line.mode)
+        assertEquals("Paris Est", tgv.headsign)
+
+        // Both go to Metz ("Metz" and "Metz-Ville, Gare"): the Luxembourg version.
+        val metz = departures.single { it.scheduled == Instant.parse("2026-11-27T07:39:00Z") }
+        assertEquals("Metz-Ville, Gare", metz.headsign)
+        assertTrue(metz.tripId.contains("_lu-administration-des-transports-publics_"))
+
+        // Buses have no train number and are left alone.
+        assertEquals(raw.count { it.mode == "BUS" }, departures.count { it.line.mode == TransportMode.BUS })
+    }
+
+    @Test
+    fun `a merged train takes the times of the version with real-time data`() {
+        val response = TransitousApi.json.decodeFromString<StopTimesResponse>(Fixtures.text("stoptimes_luxembourg_gare.json"))
+        val live = response.copy(
+            stopTimes = response.stopTimes.map {
+                if (it.tripShortName == "005111") it.copy(realTime = true, place = it.place.copy(departure = "2026-11-27T07:36:00Z")) else it
+            },
+        )
+        val re = live.toStopDepartures().departures.single { it.scheduled == Instant.parse("2026-11-27T07:33:00Z") && it.line.mode == TransportMode.REGIONAL && it.tripNumber!!.endsWith("5111") }
+        assertEquals(3L, re.delayMinutes)
+        assertTrue("the trip with real-time data", re.tripId.contains("_de-DELFI_"))
+        assertEquals("RE", re.line.name)
+        assertEquals("the German trip ends at the border", "Trier Hbf", re.headsign)
+    }
+
+    @Test
+    fun `trains of one feed are never merged, even with neighbouring numbers`() {
+        val response = TransitousApi.json.decodeFromString<StopTimesResponse>(Fixtures.text("stoptimes_luxembourg_gare.json"))
+        // RB 5928 to Arlon and RB 3608 to Diekirch leave at 07:53; make them 5928 and 5929.
+        val renumbered = response.copy(stopTimes = response.stopTimes.map { if (it.tripShortName == "03608") it.copy(tripShortName = "05929") else it })
+        val at0753 = renumbered.toStopDepartures().departures.filter { it.scheduled == Instant.parse("2026-11-27T07:53:00Z") }
+        assertEquals(listOf("Arlon, Gare", "Diekirch, Gare"), at0753.map { it.headsign }.sorted())
+    }
+
+    @Test
+    fun `luxembourg tram and buses`() {
+        val board = Fixtures.stopTimes("stoptimes_luxembourg_gare_tram.json")
+        assertEquals(Luxembourg, board.stop?.country())
+        val tram = board.departures.first { it.line.mode == TransportMode.TRAM }
+        assertEquals("T1", tram.line.name)
+        assertEquals("Luxtram", tram.operator)
+        assertFalse(tram.isRealtime)
+        assertEquals(setOf(TransportMode.TRAM, TransportMode.BUS), board.departures.map { it.line.mode }.toSet())
+        val trip = Fixtures.trip("trip_lu_re5113.json", "20261127_09:33_lu-administration-des-transports-publics_24658350")
+        assertEquals("RE", trip.line.name)
+        assertEquals("Trier Hbf", trip.headsign)
+        assertEquals(listOf(Luxembourg, Luxembourg, Luxembourg, Germany, Germany, Germany, Germany), trip.stops.map { it.place.country() })
+        assertFalse(trip.isRealtime)
     }
 
     @Test

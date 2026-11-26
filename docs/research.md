@@ -84,3 +84,23 @@ The API calls are the same as for Germany. What differs is how the data looks. T
 | Real-time | NS trains nearly always; city buses and trams partly | as in Germany: green/red only with real-time data |
 
 The country-specific rules live in `app/src/main/java/io/github/dnicotra/ovinfode/country/` (see the README for how to add another country).
+
+## 5. Luxembourg
+
+*Added November 2026, when the app learned to work in Luxembourg.*
+
+Public transport in Luxembourg is free and run as one network: CFL trains, the Luxtram, the buses of the City of Luxembourg (AVL), the regional RGTR buses and TICE in the south. The Administration des transports publics (ATP) publishes the national timetable as GTFS on [data.public.lu](https://data.public.lu/en/datasets/horaires-et-arrets-des-transport-publics-gtfs/), and Transitous uses it (feed `lu-administration-des-transports-publics`), so the app needs no new API.
+
+**No real-time data.** Transitous lists no real-time source for Luxembourg. The ATP offers real-time departures only through the mobiliteit.lu (HAFAS) API, which needs a personal key requested by e-mail ([API mobiliteit.lu](https://data.public.lu/en/datasets/api-mobiliteit-lu)); a key cannot be shipped in an open-source app, and every user requesting their own is not an option. A public GTFS-RT feed was announced years ago but is not available. So the app shows timetable times in Luxembourg, in the neutral colour it uses for any departure without real-time data, and the board adds "timetable only, no real-time data here". Trains that a neighbouring country's feed also carries (DELFI for trains to Trier, SNCF for France, SNCB for Belgium) can still bring real-time data from there.
+
+What the data looks like (recorded responses from 2026-11-26/27: Luxembourg station, the tram and bus stop in front of it, an RE to Trier):
+
+| Aspect | Luxembourg data | What the app does |
+|---|---|---|
+| Stop ids | `lu-administration-des-transports-publics_000200405020`: HAFAS station numbers whose first digit after `000` is the country (1, 2, 9 Luxembourg; 3 Belgium; 4 France; 5 Germany). DELFI has Luxembourg stations as `lu:25000:…`; the French and Belgian feeds have their own ids for Luxembourg station | the country comes from the id. The Natural Earth outlines put 165 of the 2,521 Luxembourg stops outside Luxembourg, 147 of them in Germany (Vianden, Echternach, Remich, Wasserbillig lie right on the Our, Sûre and Moselle) |
+| Stop names | "Esch-sur-Alzette, Gare", "Luxembourg, Gare Centrale"; in the capital "Quarter, Stop" ("Bonnevoie, Rotonde", "Kirchberg, Luxexpo"); Luxembourgish names ("Cents, Waassertuerm"); some with the mode ("Hamilius (Bus)", "Hamilius-Centre (Tram)") | kept as they are, as on mobiliteit.lu; no town lookups needed |
+| Lines | trains "RE", "RB", "IC", "TER", "TGV" with the train number in `tripShortName` ("05111"), tram "T1", bus numbers (AVL 1–40, RGTR 100–999). No route colours | kept; all trains are `REGIONAL_RAIL` (the TGV too), so the filter says "Train" |
+| Platforms | none | none shown |
+| Cross-border trains | the same train comes from up to three feeds, named differently and cut off at their borders: RE 5111 is "RE" to Trier in Luxembourg's feed and "RE11" to Wasserbillig in DELFI; the TER to Nancy is 88520 in the SNCF feed and 88521 to Metz-Ville in Luxembourg's (French trains change number by one where they reverse); TGV 2864 to Paris Est is "TGV" 02865 to Metz | shown once (see the README), with the times of a version with real-time data, the furthest destination and the Luxembourg name. Before, 7 of the 40 departures at Luxembourg station on a weekday morning were duplicates |
+
+Luxembourg speaks Luxembourgish, French and German; the app got a French translation, which also serves cross-border commuters from France and Belgium.

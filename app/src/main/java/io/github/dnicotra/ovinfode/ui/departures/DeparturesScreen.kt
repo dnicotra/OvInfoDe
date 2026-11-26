@@ -276,8 +276,9 @@ private fun StatusLine(state: DeparturesUiState) {
                 color = LocalStatusColors.current.delayed,
             )
         } else {
+            val updatedText = stringResource(R.string.updated_at, updated.clock())
             Text(
-                text = stringResource(R.string.updated_at, updated.clock()),
+                text = if (state.timetableOnly) updatedText + " · " + stringResource(R.string.timetable_only_here) else updatedText,
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

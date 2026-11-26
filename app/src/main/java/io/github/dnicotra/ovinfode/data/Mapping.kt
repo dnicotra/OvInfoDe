@@ -10,6 +10,7 @@ import io.github.dnicotra.ovinfode.data.api.StopTimeDto
 import io.github.dnicotra.ovinfode.data.api.StopTimesResponse
 import io.github.dnicotra.ovinfode.data.model.Alert
 import io.github.dnicotra.ovinfode.data.model.Departure
+import io.github.dnicotra.ovinfode.data.model.LatLon
 import io.github.dnicotra.ovinfode.data.model.Line
 import io.github.dnicotra.ovinfode.data.model.NamedPlace
 import io.github.dnicotra.ovinfode.data.model.Stop
@@ -17,6 +18,7 @@ import io.github.dnicotra.ovinfode.data.model.StopDepartures
 import io.github.dnicotra.ovinfode.data.model.TransportMode
 import io.github.dnicotra.ovinfode.data.model.Trip
 import io.github.dnicotra.ovinfode.data.model.TripStop
+import io.github.dnicotra.ovinfode.util.distanceMeters
 import java.time.Instant
 import java.time.OffsetDateTime
 import java.util.Locale
@@ -136,6 +138,73 @@ fun StopTimeDto.toDepartureOrNull(): Departure? {
     )
 }
 
+// The feed of a trip: "20261127_08:33_de-DELFI_3489978329" → "de-DELFI".
+private val tripFeed = Regex("""^\d{8}_\d{1,2}:\d{2}_([^_]+)_""")
+
+private fun Departure.feed(): String? = tripFeed.find(tripId)?.groupValues?.get(1)
+
+/** The train number without leading zeros ("005111" → 5111); null for buses and trams. */
+private fun Departure.trainNumber(): Long? =
+    tripNumber?.takeIf { line.mode.isRail && it.all(Char::isDigit) }?.trimStart('0')?.toLongOrNull()
+
+private fun List<Departure>.fromDistinctFeeds(): Boolean = map { it.feed() }.distinct().size == size
+
+/** Destinations closer together than this count as the same place ("Longwy" and "Longwy, Gare"). */
+private const val SAME_PLACE_METERS = 2000.0
+
+/**
+ * One departure per train. A train that crosses a border is in the timetable of each country
+ * it runs in, as a separate trip named the local way and often cut off where that network
+ * ends: at Luxembourg station, the RE to Trier is "RE" to Trier in the Luxembourg timetable and
+ * "RE11" to Wasserbillig (the border) in the German one, and the Luxembourg timetable has the
+ * TER to Nancy only as far as Metz. Departures of different feeds at the same time with the
+ * same train number are one train. French trains change their number by one where they reverse
+ * (the TER 88520 to Nancy is 88521 in the Luxembourg timetable), so 2n and 2n+1 match as well.
+ *
+ * The merged departure takes its trip and times from the version with real-time data, else
+ * from the one that goes furthest (so the trip view shows the whole trip), else from the stop's
+ * own country; its destination from the one that goes furthest; and its line and stop names
+ * from the version of the stop's own country, as people there know them. [at] is the stop's position.
+ */
+fun mergeSameTrains(departures: List<Departure>, at: LatLon?): List<Departure> {
+    if (at == null || departures.size < 2) return departures
+    val groups = departures.withIndex()
+        .filter { it.value.trainNumber() != null && it.value.feed() != null }
+        .groupBy { (_, d) -> d.scheduled to d.trainNumber()!! / 2 }
+        .values
+        .flatMap { group ->
+            // Two trips of one feed are two trains; then only exactly equal numbers can match.
+            if (group.map { it.value }.fromDistinctFeeds()) listOf(group)
+            else group.groupBy { it.value.trainNumber() }.values.filter { same -> same.map { it.value }.fromDistinctFeeds() }
+        }
+        .filter { it.size > 1 }
+    if (groups.isEmpty()) return departures
+    val merged = HashMap<Int, Departure>()
+    val dropped = HashSet<Int>()
+    groups.forEach { group ->
+        merged[group.first().index] = mergeVersions(group.map { it.value }, at)
+        group.drop(1).forEach { dropped += it.index }
+    }
+    return departures.mapIndexedNotNull { index, departure -> if (index in dropped) null else merged[index] ?: departure }
+}
+
+private fun mergeVersions(versions: List<Departure>, at: LatLon): Departure {
+    fun reach(d: Departure): Double = d.destination?.let { distanceMeters(at, LatLon(it.lat, it.lon)) } ?: 0.0
+    val furthest = versions.maxBy(::reach)
+    fun goesFurthest(d: Departure) = reach(d) >= reach(furthest) - SAME_PLACE_METERS
+    val here = Countries.of(versions.first().stopId, at.lat, at.lon)
+    val local = versions.firstOrNull { Countries.ofTrip(it.tripId) == here }
+    val main = versions.minWith(compareBy({ !it.isRealtime }, { it.cancelled }, { !goesFurthest(it) }, { it !== local }))
+    val destinationFrom = if (goesFurthest(main)) main else furthest
+    return main.copy(
+        line = local?.line?.copy(mode = main.line.mode) ?: main.line,
+        headsign = destinationFrom.headsign,
+        destination = destinationFrom.destination,
+        // The stop as the other departures at this station name it; the id stays that of the trip.
+        stopName = local?.stopName ?: main.stopName,
+    )
+}
+
 /** [language] picks the part of multilingual alerts to show. */
 fun StopTimesResponse.toStopDepartures(language: String = defaultLanguage()): StopDepartures {
     val departures = stopTimes
@@ -144,6 +213,7 @@ fun StopTimesResponse.toStopDepartures(language: String = defaultLanguage()): St
         // cancelling it and adding a new one: keep the one with real-time data that runs.
         .groupBy { Triple(it.line.name, it.headsign, it.scheduled) }
         .map { (_, same) -> same.minWith(compareBy({ !it.isRealtime }, { it.cancelled })) }
+        .let { mergeSameTrains(it, place?.let { p -> LatLon(p.lat, p.lon) }) }
     val alerts = (
         place?.let { it.alerts.toAlerts(it.country(), language) }.orEmpty() +
             stopTimes.flatMap { it.place.alerts.toAlerts(it.place.country(), language) }
