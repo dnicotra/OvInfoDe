@@ -1,0 +1,593 @@
+{
+ "48.786,9.182": [
+  {
+   "type": "STOP",
+   "tokens": [],
+   "name": "Stuttgart Hauptbahnhof",
+   "id": "at-Railway-Current-Reference-Data-2026_de:08111:6115:1:1",
+   "lat": 48.784748,
+   "lon": 9.183216999999999,
+   "areas": [
+    {
+     "name": "Deutschland",
+     "adminLevel": 2.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Baden-Württemberg",
+     "adminLevel": 4.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Regierungsbezirk Stuttgart",
+     "adminLevel": 5.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Stuttgart",
+     "adminLevel": 6.0,
+     "matched": true,
+     "unique": true,
+     "default": true
+    },
+    {
+     "name": "Stuttgart-Mitte",
+     "adminLevel": 9.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Hauptbahnhof",
+     "adminLevel": 10.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    }
+   ],
+   "score": 96.29940795898438
+  }
+ ],
+ "48.993,8.401": [
+  {
+   "type": "STOP",
+   "tokens": [],
+   "name": "Gare de Karlsruhe",
+   "id": "fr-agregat-des-reseaux-urbains-et-interurbains-en-region-grand-est_ST:9965",
+   "lat": 48.99333000000001,
+   "lon": 8.401396,
+   "areas": [
+    {
+     "name": "Deutschland",
+     "adminLevel": 2.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Baden-Württemberg",
+     "adminLevel": 4.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Regierungsbezirk Karlsruhe",
+     "adminLevel": 5.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Karlsruhe",
+     "adminLevel": 6.0,
+     "matched": true,
+     "unique": true,
+     "default": true
+    },
+    {
+     "name": "Südweststadt",
+     "adminLevel": 10.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Südweststadt Östlicher Teil",
+     "adminLevel": 11.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    }
+   ],
+   "score": -0.5055694580078125
+  }
+ ],
+ "49.137,8.916": [
+  {
+   "type": "STOP",
+   "tokens": [],
+   "name": "Eppingen, P+R",
+   "id": "de-amarillo-bw_osm:w200703866",
+   "lat": 49.136924,
+   "lon": 8.916326,
+   "areas": [
+    {
+     "name": "Deutschland",
+     "adminLevel": 2.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Baden-Württemberg",
+     "adminLevel": 4.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Regierungsbezirk Stuttgart",
+     "adminLevel": 5.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Landkreis Heilbronn",
+     "adminLevel": 6.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "VVG der Stadt Eppingen",
+     "adminLevel": 7.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Eppingen",
+     "adminLevel": 8.0,
+     "matched": true,
+     "unique": true,
+     "default": true
+    },
+    {
+     "name": "Eppingen",
+     "adminLevel": 10.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    }
+   ],
+   "score": 33.43795394897461
+  }
+ ],
+ "49.291,8.664": [
+  {
+   "type": "STOP",
+   "tokens": [],
+   "name": "Wiesloch-Walldorf, Bahnhof",
+   "id": "de-amarillo-bw_de:08226:4252",
+   "lat": 49.291070000000005,
+   "lon": 8.664223999999999,
+   "areas": [
+    {
+     "name": "Deutschland",
+     "adminLevel": 2.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Baden-Württemberg",
+     "adminLevel": 4.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Regierungsbezirk Karlsruhe",
+     "adminLevel": 5.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Rhein-Neckar-Kreis",
+     "adminLevel": 6.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "VVG der Stadt Wiesloch",
+     "adminLevel": 7.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Wiesloch",
+     "adminLevel": 8.0,
+     "matched": true,
+     "unique": true,
+     "default": true
+    },
+    {
+     "name": "Wiesloch",
+     "adminLevel": 10.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    }
+   ],
+   "score": -6.28301477432251
+  }
+ ],
+ "49.328,7.337": [
+  {
+   "type": "STOP",
+   "tokens": [],
+   "name": "Homburg (Saar) Hbf",
+   "id": "de-DELFI_de:10045:8000176",
+   "lat": 49.328083,
+   "lon": 7.337034999999999,
+   "areas": [
+    {
+     "name": "Deutschland",
+     "adminLevel": 2.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Saarland",
+     "adminLevel": 4.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Saarpfalz-Kreis",
+     "adminLevel": 6.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Homburg",
+     "adminLevel": 8.0,
+     "matched": true,
+     "unique": true,
+     "default": true
+    },
+    {
+     "name": "Erbach",
+     "adminLevel": 9.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Erbach",
+     "adminLevel": 10.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    }
+   ],
+   "score": -10.0
+  }
+ ],
+ "49.404,8.675": [
+  {
+   "type": "STOP",
+   "tokens": [],
+   "name": "Heidelberg Hauptbahnhof",
+   "id": "at-Railway-Current-Reference-Data-2026_de:08221:1160:1:1",
+   "lat": 49.40392,
+   "lon": 8.675462000000001,
+   "areas": [
+    {
+     "name": "Deutschland",
+     "adminLevel": 2.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Baden-Württemberg",
+     "adminLevel": 4.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Regierungsbezirk Karlsruhe",
+     "adminLevel": 5.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Heidelberg",
+     "adminLevel": 6.0,
+     "matched": true,
+     "unique": true,
+     "default": true
+    },
+    {
+     "name": "Weststadt",
+     "adminLevel": 9.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    }
+   ],
+   "score": 55.34601593017578
+  }
+ ],
+ "49.430,9.422": [
+  {
+   "type": "STOP",
+   "tokens": [],
+   "name": "Osterburken, Bahnhof",
+   "id": "de-DELFI_de:08225:8200_G",
+   "lat": 49.429657,
+   "lon": 9.422692000000001,
+   "areas": [
+    {
+     "name": "Deutschland",
+     "adminLevel": 2.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Baden-Württemberg",
+     "adminLevel": 4.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Regierungsbezirk Karlsruhe",
+     "adminLevel": 5.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Neckar-Odenwald-Kreis",
+     "adminLevel": 6.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "GVV Osterburken",
+     "adminLevel": 7.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Osterburken",
+     "adminLevel": 8.0,
+     "matched": true,
+     "unique": true,
+     "default": true
+    }
+   ],
+   "score": 11.726373672485352
+  }
+ ],
+ "49.479,8.470": [
+  {
+   "type": "STOP",
+   "tokens": [],
+   "name": "Mannheim Hauptbahnhof",
+   "id": "at-Railway-Current-Reference-Data-2026_de:08222:2417:4:2",
+   "lat": 49.47941,
+   "lon": 8.469649000000002,
+   "areas": [
+    {
+     "name": "Deutschland",
+     "adminLevel": 2.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Baden-Württemberg",
+     "adminLevel": 4.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Regierungsbezirk Karlsruhe",
+     "adminLevel": 5.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Mannheim",
+     "adminLevel": 6.0,
+     "matched": true,
+     "unique": true,
+     "default": true
+    },
+    {
+     "name": "Schwetzingerstadt/Oststadt",
+     "adminLevel": 9.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Schwetzingerstadt",
+     "adminLevel": 10.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    }
+   ],
+   "score": 58.622093200683594
+  }
+ ],
+ "50.107,8.663": [
+  {
+   "type": "STOP",
+   "tokens": [],
+   "name": "Frankfurt (Main) Hauptbahnhof",
+   "id": "at-Railway-Current-Reference-Data-2026_de:06412:10:16:16",
+   "lat": 50.106293,
+   "lon": 8.661960999999998,
+   "areas": [
+    {
+     "name": "Deutschland",
+     "adminLevel": 2.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Hessen",
+     "adminLevel": 4.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Regierungsbezirk Darmstadt",
+     "adminLevel": 5.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Frankfurt am Main",
+     "adminLevel": 6.0,
+     "matched": true,
+     "unique": true,
+     "default": true
+    },
+    {
+     "name": "Innenstadt 1",
+     "adminLevel": 9.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Gallus",
+     "adminLevel": 10.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    }
+   ],
+   "score": 65.33187103271484
+  }
+ ],
+ "50.351,7.588": [
+  {
+   "type": "STOP",
+   "tokens": [],
+   "name": "Koblenz Hbf (DE)",
+   "id": "be-sncb_8019023",
+   "lat": 50.35083999999999,
+   "lon": 7.588441,
+   "areas": [
+    {
+     "name": "Deutschland",
+     "adminLevel": 2.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Rheinland-Pfalz",
+     "adminLevel": 4.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Koblenz",
+     "adminLevel": 6.0,
+     "matched": true,
+     "unique": true,
+     "default": true
+    },
+    {
+     "name": "Goldgrube",
+     "adminLevel": 10.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    }
+   ],
+   "score": -1.294386863708496
+  }
+ ],
+ "51.040,13.731": [
+  {
+   "type": "STOP",
+   "tokens": [],
+   "name": "Dresden Hbf",
+   "id": "at-Railway-Current-Reference-Data-2026_de:14612:28:10:Gleis3",
+   "lat": 51.040016,
+   "lon": 13.73153,
+   "areas": [
+    {
+     "name": "Deutschland",
+     "adminLevel": 2.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Sachsen",
+     "adminLevel": 4.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Dresden",
+     "adminLevel": 6.0,
+     "matched": true,
+     "unique": true,
+     "default": true
+    },
+    {
+     "name": "Altstadt",
+     "adminLevel": 9.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    },
+    {
+     "name": "Seevorstadt-Ost/Großer Garten",
+     "adminLevel": 11.0,
+     "matched": true,
+     "unique": false,
+     "default": false
+    }
+   ],
+   "score": 8.26446533203125
+  }
+ ]
+}

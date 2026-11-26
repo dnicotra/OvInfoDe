@@ -4,11 +4,13 @@ import android.app.Application
 import android.content.Context
 import androidx.datastore.preferences.preferencesDataStore
 import io.github.dnicotra.ovinfode.data.LocationProvider
+import io.github.dnicotra.ovinfode.data.TownResolver
 import io.github.dnicotra.ovinfode.data.TransitRepository
 import io.github.dnicotra.ovinfode.data.UserPrefs
 import io.github.dnicotra.ovinfode.data.api.TransitousApi
 
 private val Context.dataStore by preferencesDataStore(name = "user_prefs")
+private val Context.townStore by preferencesDataStore(name = "place_towns")
 
 class OvInfoApp : Application() {
     lateinit var container: AppContainer
@@ -25,7 +27,7 @@ class AppContainer(context: Context) {
     val api = TransitousApi(
         userAgent = "${context.getString(R.string.app_name)}/${BuildConfig.VERSION_NAME} (Android; +${BuildConfig.PROJECT_URL})",
     )
-    val repository = TransitRepository(api)
+    val repository = TransitRepository(api, TownResolver(api, context.townStore))
     val prefs = UserPrefs(context.dataStore)
     val location = LocationProvider(context)
 }

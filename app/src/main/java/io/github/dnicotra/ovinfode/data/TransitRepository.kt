@@ -2,19 +2,27 @@ package io.github.dnicotra.ovinfode.data
 
 import io.github.dnicotra.ovinfode.data.api.ApiException
 import io.github.dnicotra.ovinfode.data.api.TransitousApi
+import io.github.dnicotra.ovinfode.data.model.Departure
 import io.github.dnicotra.ovinfode.data.model.ErrorKind
 import io.github.dnicotra.ovinfode.data.model.LatLon
+import io.github.dnicotra.ovinfode.data.model.NamedPlace
 import io.github.dnicotra.ovinfode.data.model.NearbyStop
 import io.github.dnicotra.ovinfode.data.model.Stop
 import io.github.dnicotra.ovinfode.data.model.StopDepartures
 import io.github.dnicotra.ovinfode.data.model.Trip
 import io.github.dnicotra.ovinfode.util.boundingBox
 import io.github.dnicotra.ovinfode.util.distanceMeters
+import io.github.dnicotra.ovinfode.util.needsTown
+import io.github.dnicotra.ovinfode.util.placeKey
+import io.github.dnicotra.ovinfode.util.qualifyName
 import kotlinx.serialization.SerializationException
 import java.io.IOException
 import kotlin.coroutines.cancellation.CancellationException
 
-class TransitRepository(private val api: TransitousApi) {
+class TransitRepository(
+    private val api: TransitousApi,
+    private val towns: TownResolver = TownResolver(api),
+) {
 
     suspend fun searchStops(query: String, near: LatLon?): List<Stop> =
         api.geocode(query, near)
@@ -45,10 +53,37 @@ class TransitRepository(private val api: TransitousApi) {
         return result.take(limit)
     }
 
-    suspend fun departures(stop: Stop, count: Int, pageCursor: String? = null): StopDepartures =
-        api.stopTimes(stop.id, stop.location, count, pageCursor).toStopDepartures()
+    suspend fun departures(stop: Stop, count: Int, pageCursor: String? = null): StopDepartures {
+        val result = api.stopTimes(stop.id, stop.location, count, pageCursor).toStopDepartures()
+        return result.copy(departures = withTowns(result.departures, contextStopId = stop.id))
+    }
 
-    suspend fun trip(tripId: String): Trip = api.trip(tripId).toTrip(tripId)
+    /** A trip with all its stops; [contextStopId] is the stop the user came from. */
+    suspend fun trip(tripId: String, contextStopId: String? = null): Trip {
+        val trip = api.trip(tripId).toTrip(tripId)
+        val context = contextStopId ?: trip.stops.firstOrNull()?.id
+        val candidates = trip.stops.filter { needsTown(it.name, it.id, context) }.map { it.place }
+        if (candidates.isEmpty()) return trip
+        val known = towns.towns(candidates)
+        if (known.isEmpty()) return trip
+        val stops = trip.stops.map { stop -> known[placeKey(stop.place)]?.let { stop.copy(name = qualifyName(stop.name, it)) } ?: stop }
+        val headsign = if (trip.headsign == trip.stops.lastOrNull()?.name) stops.last().name else trip.headsign
+        return trip.copy(stops = stops, headsign = headsign)
+    }
+
+    /** Adds the town to destinations like "Hauptbahnhof" that lie elsewhere (see [needsTown]). */
+    private suspend fun withTowns(departures: List<Departure>, contextStopId: String?): List<Departure> {
+        // Only when the headsign is the bare name of the final stop; other headsigns are written by the operator.
+        fun Departure.candidate(): NamedPlace? = destination?.takeIf { headsign == it.name && needsTown(it.name, it.id, contextStopId) }
+        val candidates = departures.mapNotNull { it.candidate() }
+        if (candidates.isEmpty()) return departures
+        val known = towns.towns(candidates)
+        if (known.isEmpty()) return departures
+        return departures.map { departure ->
+            val town = departure.candidate()?.let { known[placeKey(it)] }
+            if (town != null) departure.copy(headsign = qualifyName(departure.headsign, town)) else departure
+        }
+    }
 }
 
 /** Runs [block], turning failures (but not cancellation) into a [Result]. */

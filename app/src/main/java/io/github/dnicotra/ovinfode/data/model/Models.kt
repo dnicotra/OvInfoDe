@@ -5,6 +5,9 @@ import java.time.Instant
 
 data class LatLon(val lat: Double, val lon: Double)
 
+/** A stop as it appears in a trip or as a destination. */
+data class NamedPlace(val id: String?, val name: String, val lat: Double, val lon: Double)
+
 /** Transport modes as shown to the user (MOTIS modes folded into familiar German categories). */
 enum class TransportMode {
     LONG_DISTANCE, REGIONAL, SUBURBAN, SUBWAY, TRAM, BUS, COACH, FERRY, CABLE, ON_DEMAND, OTHER;
@@ -70,6 +73,8 @@ data class Departure(
     val stopId: String?,
     val stopName: String,
     val tripNumber: String?,
+    /** Final stop of the trip; [headsign] is usually its name. */
+    val destination: NamedPlace? = null,
 ) {
     val time: Instant get() = estimated ?: scheduled
     val isRealtime: Boolean get() = estimated != null
@@ -91,6 +96,8 @@ data class StopDepartures(
 data class TripStop(
     val id: String?,
     val name: String,
+    val lat: Double,
+    val lon: Double,
     val scheduledArrival: Instant?,
     val arrival: Instant?,
     val scheduledDeparture: Instant?,
@@ -99,6 +106,8 @@ data class TripStop(
     val scheduledPlatform: String?,
     val cancelled: Boolean,
 ) {
+    val place: NamedPlace get() = NamedPlace(id, name, lat, lon)
+
     /** Best known arrival time (real-time if available). */
     val effectiveArrival: Instant? get() = arrival ?: scheduledArrival ?: effectiveDepartureOrNull()
     /** Best known departure time (real-time if available). */

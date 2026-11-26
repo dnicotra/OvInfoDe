@@ -54,7 +54,7 @@ class TripViewModel(
         loadJob = viewModelScope.launch {
             if (userInitiated && _state.value.trip != null) _state.update { it.copy(refreshing = true) }
             if (_state.value.trip == null) _state.update { it.copy(loading = true, error = null) }
-            safeCall { repository.trip(tripId) }
+            safeCall { repository.trip(tripId, fromStopId) }
                 .onSuccess { trip ->
                     _state.update {
                         it.copy(

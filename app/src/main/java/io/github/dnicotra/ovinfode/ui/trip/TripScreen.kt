@@ -43,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -322,7 +323,12 @@ private fun VehicleDot(mode: io.github.dnicotra.ovinfode.data.model.TransportMod
             .background(color, CircleShape),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(mode.icon(), contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+        Icon(
+            mode.icon(),
+            contentDescription = null,
+            tint = if (color.luminance() > 0.5f) Color.Black else Color.White,
+            modifier = Modifier.size(16.dp),
+        )
     }
 }
 

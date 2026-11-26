@@ -9,6 +9,7 @@ import io.github.dnicotra.ovinfode.data.api.StopTimesResponse
 import io.github.dnicotra.ovinfode.data.model.Alert
 import io.github.dnicotra.ovinfode.data.model.Departure
 import io.github.dnicotra.ovinfode.data.model.Line
+import io.github.dnicotra.ovinfode.data.model.NamedPlace
 import io.github.dnicotra.ovinfode.data.model.Stop
 import io.github.dnicotra.ovinfode.data.model.StopDepartures
 import io.github.dnicotra.ovinfode.data.model.TransportMode
@@ -103,6 +104,7 @@ fun StopTimeDto.toDepartureOrNull(): Departure? {
         stopId = place.stopId,
         stopName = place.name,
         tripNumber = tripShortName?.takeIf { it.isNotBlank() },
+        destination = tripTo?.let { NamedPlace(it.stopId, it.name, it.lat, it.lon) },
     )
 }
 
@@ -124,6 +126,8 @@ fun StopTimesResponse.toStopDepartures(): StopDepartures {
 private fun PlaceDto.toTripStop(realtime: Boolean): TripStop = TripStop(
     id = stopId,
     name = name,
+    lat = lat,
+    lon = lon,
     scheduledArrival = parseInstant(scheduledArrival),
     arrival = if (realtime) parseInstant(arrival) else null,
     scheduledDeparture = parseInstant(scheduledDeparture),

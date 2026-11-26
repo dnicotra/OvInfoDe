@@ -57,6 +57,14 @@ class TransitousApi(
             near?.let { addQueryParameter("place", it.toParam()) }
         }
 
+    /** The stop closest to [place]; its default area is the town it lies in. */
+    suspend fun reverseGeocode(place: LatLon): List<MatchDto> =
+        get("api/v1/reverse-geocode") {
+            addQueryParameter("place", place.toParam())
+            addQueryParameter("type", "STOP")
+            addQueryParameter("numResults", "1")
+        }
+
     /** All (grouped) stops inside a bounding box. */
     suspend fun mapStops(min: LatLon, max: LatLon, language: String = defaultLanguage()): List<PlaceDto> =
         get("api/v6/map/stops") {

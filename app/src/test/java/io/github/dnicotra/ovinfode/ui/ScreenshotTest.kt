@@ -3,8 +3,10 @@ package io.github.dnicotra.ovinfode.ui
 import androidx.compose.runtime.Composable
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.takahirom.roborazzi.captureRoboImage
+import io.github.dnicotra.ovinfode.FakeTransitous
 import io.github.dnicotra.ovinfode.Fixtures
 import io.github.dnicotra.ovinfode.data.DepartureViewMode
+import io.github.dnicotra.ovinfode.data.TransitRepository
 import io.github.dnicotra.ovinfode.data.api.MatchDto
 import io.github.dnicotra.ovinfode.data.api.PlaceDto
 import io.github.dnicotra.ovinfode.data.api.TransitousApi
@@ -29,6 +31,7 @@ import io.github.dnicotra.ovinfode.ui.trip.TripContent
 import io.github.dnicotra.ovinfode.ui.trip.TripUiState
 import io.github.dnicotra.ovinfode.util.distanceMeters
 import io.github.dnicotra.ovinfode.util.indexOfStop
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -117,6 +120,28 @@ class ScreenshotTest {
             lastUpdated = Instant.parse("2026-11-26T06:05:30Z"),
         )
         capture("trip") { TripContent(state, Instant.parse("2026-11-26T06:05:30Z"), {}, {}) }
+    }
+
+    /** The ICE from Heidelberg to Stuttgart, whose final stop is called just "Hauptbahnhof" in the data. */
+    @Test
+    fun tripToStuttgartDark() {
+        val fake = FakeTransitous(mapOf("/api/v6/trip" to "trip_ice1697.json"))
+        val heidelbergPlatform = "de-DELFI_de:08221:1160:5:8"
+        val trip = runBlocking { TransitRepository(fake.api).trip("20261126_07:03_de-DELFI_3490184955", heidelbergPlatform) }
+        val now = Instant.parse("2026-11-26T07:01:00Z")
+        val state = TripUiState(loading = false, trip = trip, highlightIndex = indexOfStop(trip.stops, heidelbergPlatform, null), lastUpdated = now)
+        capture("trip_ice_dark", dark = true) { TripContent(state, now, {}, {}) }
+    }
+
+    @Test
+    fun departuresHeidelberg() {
+        val fake = FakeTransitous(mapOf("/api/v6/stoptimes" to "stoptimes_heidelberg_hbf.json"))
+        val stop = Stop("at-Railway-Current-Reference-Data-2026_de:08221:1160:1:1", "Heidelberg, Hauptbahnhof", 49.4035, 8.6748)
+        val board = runBlocking { TransitRepository(fake.api).departures(stop, 10) }
+        val now = Instant.parse("2026-11-26T07:00:30Z")
+        capture("departures_heidelberg") {
+            Board(DeparturesUiState(stop, loading = false, departures = board.departures, lastUpdated = now), DepartureViewMode.BY_TIME, now)
+        }
     }
 
     @Test
