@@ -83,7 +83,47 @@ class CountriesTest {
     }
 
     @Test
+    fun `italian stops`() {
+        // South Tyrol (STA) and DELFI write Italian stop ids with a country code, like German DHIDs.
+        assertSame(Italy, of("it-Bolzano-STA_it:22021:2143:0:5235", 46.4775, 11.3305))
+        assertSame(Italy, of("de-DELFI_it:22021:468", 46.4967, 11.3579))
+        // Other ids go by position: Trenitalia, ATM, Rome, the Austrian railway data for Bologna.
+        assertSame(Italy, of("it-trenitalia_08409:station", 41.9005, 12.502))
+        assertSame(Italy, of("it-Lombardia-ATM_DUOMO M3", 45.4639, 9.1886))
+        assertSame(Italy, of("at-Railway-Current-Reference-Data-2026_Pit:22015:116", 44.5059, 11.3433))
+        assertSame(Italy, of("it-Veneto-Venezia-Ferries_5166", 45.4380, 12.3359)) // Rialto
+        assertSame(Italy, of(null, 38.1100, 13.3400)) // Palermo
+        assertSame(Italy, of(null, 35.5000, 12.6050)) // Lampedusa
+        assertSame(Italy, of(null, 41.2140, 9.4070)) // La Maddalena
+        // Off the simplified coast or on islands the outline lacks: Italian feeds only.
+        assertSame(Italy, of("it-Veneto-Venezia-Ferries_x", 45.4853, 12.4167)) // Burano
+        assertSame(Italy, of("it-Campania-EAV_068040", 40.7551, 14.0123)) // Procida
+        assertSame(Italy, of("it-trenitalia_12345", 39.2170, 9.1100)) // Cagliari
+        assertSame(OtherCountry, of("eu-flixbus_x", 40.7551, 14.0123))
+        // San Marino and the Vatican lie inside the outline, and speak Italian.
+        assertSame(Italy, of(null, 43.9360, 12.4470))
+        // Neighbours.
+        assertSame(OtherCountry, of("it-trenitalia_x", 47.3780, 8.5400)) // Zürich HB
+        assertSame(OtherCountry, of(null, 43.7046, 7.2619)) // Nice
+        assertSame(OtherCountry, of(null, 46.0050, 8.9470)) // Lugano
+        assertSame(OtherCountry, of(null, 47.2630, 11.4010)) // Innsbruck
+        assertSame(OtherCountry, of(null, 35.8970, 14.5130)) // Valletta
+    }
+
+    @Test
+    fun `stops belong to the country of their feed for its naming rules`() {
+        assertSame(Italy, Countries.ofFeed("it-trenitalia_01700:station"))
+        assertSame(Italy, Countries.ofFeed("it-Lombardia-ATM_CENTRALE FS"))
+        assertSame(Germany, Countries.ofFeed("de-DELFI_it:22021:468"))
+        assertNull(Countries.ofFeed("eu-flixbus_123"))
+        assertNull(Countries.ofFeed("ch-opentransportdataswiss26_Parentch:1:sloid:10"))
+        assertNull(Countries.ofFeed(null))
+    }
+
+    @Test
     fun `trips belong to the country of their feed`() {
+        assertSame(Italy, Countries.ofTrip("20261127_08:35_it-trenitalia_0083_620083_0_v_62-4594-890C-0083_v_62-4594-890C-0083"))
+        assertSame(Italy, Countries.ofTrip("20261126_24:08_it-Piemonte-Gruppo-Torinese-Trasporti_28557163U"))
         assertSame(Netherlands, Countries.ofTrip("20261126_09:27_nl-OpenOV_395288670"))
         assertSame(Netherlands, Countries.ofTrip("20261126_09:12_nl-OpenOV_2026-11-26:IFF:IC:303531"))
         assertSame(Germany, Countries.ofTrip("20261126_07:03_de-DELFI_3490184955"))
@@ -98,6 +138,7 @@ class CountriesTest {
         assertTrue(amsterdam in Netherlands.outline)
         assertTrue(LatLon(52.52, 13.40) in Germany.outline) // Berlin
         assertTrue(LatLon(48.14, 11.58) in Germany.outline) // Munich
+        assertTrue(LatLon(41.90, 12.50) in Italy.outline) // Rome
         assertTrue(LatLon(49.61, 6.13) in Luxembourg.outline) // Luxembourg City
         assertFalse(LatLon(49.757, 6.651) in Luxembourg.outline) // Trier
         assertTrue(Netherlands.outline.isNear(LatLon(52.37, 4.70), km = 10.0)) // North Sea off Zandvoort
@@ -110,6 +151,7 @@ class CountriesTest {
     fun `codes`() {
         assertSame(Netherlands, Countries.byCode("NL"))
         assertSame(Germany, Countries.byCode("de"))
+        assertSame(Italy, Countries.byCode("IT"))
         assertSame(Luxembourg, Countries.byCode("LU"))
         assertNull(Countries.byCode("be"))
         assertNull(Countries.byCode(null))

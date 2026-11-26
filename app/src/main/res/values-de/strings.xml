@@ -88,10 +88,10 @@
 
     <!-- Attribution / about -->
     <string name="attribution">Daten: Transitous · © OpenStreetMap-Mitwirkende</string>
-    <string name="about_description">Live-Abfahrten für Bus, Tram, U-Bahn, S-Bahn und Zug in Deutschland, den Niederlanden und Luxemburg (und darüber hinaus): Haltestellen in der Nähe, Favoriten, Verspätungen und Ausfälle auf einen Blick.</string>
+    <string name="about_description">Live-Abfahrten für Bus, Tram, U-Bahn, S-Bahn und Zug in Deutschland, den Niederlanden, Italien und Luxemburg (und darüber hinaus): Haltestellen in der Nähe, Favoriten, Verspätungen und Ausfälle auf einen Blick.</string>
     <string name="about_version">Version %1$s</string>
     <string name="about_data_title">Datenquellen</string>
-    <string name="about_data_text">Fahrplan- und Echtzeitdaten stammen von Transitous, einem freien, ehrenamtlich betriebenen ÖPNV-Dienst. Für Deutschland nutzt Transitous die bundesweiten DELFI-Soll- und Echtzeitdaten, für die Niederlande die von OpenOV, für Luxemburg den landesweiten Fahrplan der Administration des transports publics (ohne Echtzeitdaten). Haltestellen und Karten basieren auf OpenStreetMap.</string>
+    <string name="about_data_text">Fahrplan- und Echtzeitdaten stammen von Transitous, einem freien, ehrenamtlich betriebenen ÖPNV-Dienst. Für Deutschland nutzt Transitous die bundesweiten DELFI-Soll- und Echtzeitdaten, für die Niederlande die von OpenOV, für Italien die von Trenitalia, Trenord und den Regional- und Stadtverkehrsbetrieben (viele über BusOne), für Luxemburg den landesweiten Fahrplan der Administration des transports publics (ohne Echtzeitdaten). Haltestellen und Karten basieren auf OpenStreetMap.</string>
     <string name="about_link_sources">Datenquellen und Lizenzen von Transitous</string>
     <string name="about_link_osm">OpenStreetMap-Urheberrecht</string>
     <string name="about_link_donate">Transitous mit einer Spende unterstützen</string>

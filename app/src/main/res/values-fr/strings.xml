@@ -89,10 +89,10 @@
 
     <!-- Attribution / about -->
     <string name="attribution">Données : Transitous · © les contributeurs d’OpenStreetMap</string>
-    <string name="about_description">Les prochains départs des bus, trams, métros et trains en Allemagne, aux Pays-Bas et au Luxembourg (et au-delà) : arrêts à proximité, favoris, retards et suppressions en un coup d’œil.</string>
+    <string name="about_description">Les prochains départs des bus, trams, métros et trains en Allemagne, aux Pays-Bas, en Italie et au Luxembourg (et au-delà) : arrêts à proximité, favoris, retards et suppressions en un coup d’œil.</string>
     <string name="about_version">Version %1$s</string>
     <string name="about_data_title">Sources des données</string>
-    <string name="about_data_text">Les horaires et les données en temps réel sont fournis par Transitous, un service de transport public libre et gratuit, géré par des bénévoles. Pour l’Allemagne, il utilise les horaires et le temps réel nationaux de DELFI, pour les Pays-Bas ceux d’OpenOV, pour le Luxembourg les horaires nationaux de l’Administration des transports publics (sans temps réel). Les arrêts et les cartes sont basés sur OpenStreetMap.</string>
+    <string name="about_data_text">Les horaires et les données en temps réel sont fournis par Transitous, un service de transport public libre et gratuit, géré par des bénévoles. Pour l’Allemagne, il utilise les horaires et le temps réel nationaux de DELFI, pour les Pays-Bas ceux d’OpenOV, pour l’Italie ceux de Trenitalia, de Trenord et des réseaux régionaux et urbains (beaucoup via BusOne), pour le Luxembourg les horaires nationaux de l’Administration des transports publics (sans temps réel). Les arrêts et les cartes sont basés sur OpenStreetMap.</string>
     <string name="about_link_sources">Sources des données et licences de Transitous</string>
     <string name="about_link_osm">Droits d’auteur OpenStreetMap</string>
     <string name="about_link_donate">Soutenir Transitous par un don</string>

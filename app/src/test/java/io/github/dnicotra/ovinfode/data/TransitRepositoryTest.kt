@@ -140,6 +140,35 @@ class TransitRepositoryTest {
     }
 
     @Test
+    fun `italian boards and trips need no town lookups`() = runBlocking {
+        val fake = FakeTransitous(
+            mapOf(
+                "/api/v6/stoptimes" to "stoptimes_roma_termini.json",
+                "/api/v6/trip" to "trip_fr9490.json",
+            ),
+        )
+        val repository = TransitRepository(fake.api)
+        val termini = Stop("it-trenitalia_08409:station", "Roma Termini", 41.9005, 12.502)
+
+        val departures = repository.departures(termini, count = 40).departures
+        val trip = repository.trip("20261127_06:10_it-trenitalia_0083_680083_0_v_68-9490-5B67-0083_v_68-9490-5B67-0083", contextStopId = "it-trenitalia_08409")
+
+        assertEquals("Venezia S. Lucia", trip.headsign)
+        assertEquals("Cassino", departures.first().headsign)
+        assertEquals(0, fake.requestsTo("/api/v1/reverse-geocode").size)
+    }
+
+    @Test
+    fun `nearby stops in Milan`() = runBlocking {
+        val fake = FakeTransitous(mapOf("/api/v6/map/stops" to "mapstops_milano_duomo.json"))
+        val nearby = TransitRepository(fake.api).nearbyStops(LatLon(45.4642, 9.1900))
+
+        assertEquals(listOf("Duomo M1", "Duomo M3", "Via Orefici P.za Cordusio"), nearby.take(3).map { it.stop.name })
+        assertTrue(nearby.any { it.stop.name == "Teatro alla Scala" })
+        assertTrue(nearby.any { it.stop.name == "Via Orefici P.za Cordusio" })
+    }
+
+    @Test
     fun `server errors become ApiException and map to SERVER`() = runBlocking {
         val fake = FakeTransitous(override = { 500 to """{"error":"internal"}""" })
         try {

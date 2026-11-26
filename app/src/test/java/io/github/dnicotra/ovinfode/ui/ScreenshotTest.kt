@@ -161,6 +161,23 @@ class ScreenshotTest {
         }
     }
 
+    /** Roma Termini in Italian: Trenitalia's names in capitals spelled the Italian way, each train once. */
+    @Test
+    @Config(qualifiers = "it-rIT-w400dp-h860dp-xxhdpi")
+    fun departuresRoma() {
+        TimeZone.setDefault(TimeZone.getTimeZone("Europe/Rome"))
+        val fake = FakeTransitous(mapOf("/api/v6/stoptimes" to "stoptimes_roma_termini.json"))
+        val stop = Stop(
+            "it-trenitalia_08409:station", "Roma Termini", 41.9005, 12.502, "Roma",
+            sortedSetOf(TransportMode.LONG_DISTANCE, TransportMode.REGIONAL, TransportMode.BUS),
+        )
+        val board = runBlocking { TransitRepository(fake.api).departures(stop, 40) }
+        val now = Instant.parse("2026-11-27T06:58:40Z")
+        capture("departures_roma") {
+            Board(DeparturesUiState(stop, loading = false, departures = board.departures, lastUpdated = now), DepartureViewMode.BY_TIME, now)
+        }
+    }
+
     /** Luxembourg station in French: CFL trains named as in Luxembourg, each cross-border train once, timetable times only. */
     @Test
     @Config(qualifiers = "fr-rLU-w400dp-h860dp-xxhdpi")

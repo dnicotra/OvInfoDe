@@ -8,7 +8,7 @@ Each country's polygons are simplified (Douglas-Peucker, default 400 m) and stor
 polylines (precision 1e-5), a few kilobytes per country.
 
 Usage, from the repository root:
-    python3 tools/country_outlines.py NL DE > app/src/main/java/io/github/dnicotra/ovinfode/country/CountryOutlines.kt
+    python3 tools/country_outlines.py NL DE IT LU > app/src/main/java/io/github/dnicotra/ovinfode/country/CountryOutlines.kt
 Pass --geojson FILE to use a downloaded copy instead of fetching it (13 MB).
 """
 import argparse

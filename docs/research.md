@@ -85,7 +85,28 @@ The API calls are the same as for Germany. What differs is how the data looks. T
 
 The country-specific rules live in `app/src/main/java/io/github/dnicotra/ovinfode/country/` (see the README for how to add another country).
 
-## 5. Luxembourg
+## 5. Italy
+
+*Added November 2026, when the app learned to work in Italy.*
+
+Italy has no national real-time feed like DELFI or OpenOV, and no OVinfo-like API. Transitous covers it with Trenitalia's national timetable plus about forty regional and city feeds ([feed list](https://github.com/public-transport/transitous/blob/main/feeds/it.json)): Trenord, ATM (Milan), ATAC/Roma Mobilità (Rome), Cotral (Lazio), GTT (Turin), ANM and EAV (Naples), TPER (Bologna), ACTV (Venice buses and boats), Autolinee Toscane, AMT (Genoa), STA (South Tyrol), Trentino Trasporti, Sicily, Sardinia and more. Many come through [BusOne](https://busone.app), which processes them and offers real-time data (GTFS-RT, and SIRI for Trenitalia) for non-commercial use, which this app is. So the app uses Transitous for Italy too, with the same API calls.
+
+**Gaps.** Italo (NTV), the second high-speed operator, has no open feed and is missing, so Italo trains do not show at Roma Termini or Milano Centrale. Trenitalia's data has no platforms. Real-time data for Trenitalia could not be checked (the data was recorded at night); GTT buses, Rome and FlixBus had real-time data, most city feeds have none.
+
+What the data looked like on 2026-11-27 (Roma Termini, Milano Duomo and Cadorna, Torino Porta Nuova, Rome buses, a Frecciarossa), and what the app does:
+
+| Aspect | Italian data | What the app does |
+|---|---|---|
+| Stop ids | `it-trenitalia_08409:station`, `it-Lombardia-ATM_DUOMO M3`, `it-Lazio-Rome_AD12`; only South Tyrol (STA) and DELFI use ids with a country code (`it:22021:2143:0:5235`); Bologna Centrale comes from the Austrian railway data (`at-Railway-…_Pit:22015:116`) | the country comes from the outline of Italy; stops of Italian feeds up to 6 km off it count as Italian (Procida and Capri are missing from the Natural Earth outline). San Marino and the Vatican lie inside it |
+| Stop names | in capitals: "ROMA TERMINI", "REGGIO DI CALABRIA CENTRALE", "P.ZA STAZIONE S. PIETRO (FL)", "CITTA' GIARDINO"; ATM all in lower case: "stazione centrale m2 m3", "p.le cim.monumentale via bramante"; codes: GTT "Fermata 252 - PORTA NUOVA", "Fermata 3456 - STATI UNITI CAP" (capolinea), Cotral "ROMA \| Termini FS (Giolitti) # f14637", STA "Roma, Stazione di Roma Termini" | the usual spelling: words capitalised, prepositions in lower case, abbreviations (FS, M3, (MA), XX) and shortened words (P.za, V.le, Staz.ne) kept, "CITTA'" → "Città"; codes removed. Names written with care (Trenord, STA) keep their spelling. Also for stops of Italian feeds abroad (Trenitalia's "ZURIGO HB") |
+| Broken text | ATM: "bicocca (universitÃ )" (UTF-8 read as Latin-1); Rome alerts: Windows-1252 quotes as control characters, `&#039;`, `\r\n`, a "(@romamobilita)" signature | repaired for every country; the signature is removed |
+| Destinations | towns ("Fiumicino Aeroporto", "Cassino") or places in the same city | no town lookups |
+| Lines | Trenitalia: "FR 9490", "REG 12655", "RV 4594" with colours (Frecciarossa red, regional greens); ATM metro "1"–"5" in pure ff0000/73ff01/fcff01 with black text; Rome metro "MEA", "MEB1"; Trenord "S3", "RE80" | regional trains by category ("REG", "RV"; five-digit numbers do not fit a line badge), long-distance trains with their number; M1–M5 in the network map colours; A, B, B1, C |
+| Trip numbers | Trenitalia train numbers; Trenord "S3 - 823", "RE_80 - 25510"; buses: internal ids (ATAC "27333574") | train numbers only, without the line |
+| Duplicates | Trenitalia has many trains twice, as versions "p" and "v" in the trip id: REG 4594 and RV 4594 at the same time, FR 9308 at 08:20 and 08:25; the "p" REG 4594 runs Roma–Fiumicino back and forth all day. Some trains are also twice as "v" (IC 503 to Savona at 04:40 and 06:05) | the "p" copy is dropped when the "v" one is on the board; double "v" trains are left, as nothing says which one runs |
+| Modes | FR/FA/FB/IC/EC/ICN as high-speed or long-distance, REG/RV regional, SFM/MET suburban; Trenord all regional | "Lunga percorrenza", "Regionale", "Metro" in Italian |
+
+## 6. Luxembourg
 
 *Added November 2026, when the app learned to work in Luxembourg.*
 
