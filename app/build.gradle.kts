@@ -66,7 +66,9 @@ android {
                     "robolectric.dependency.repo.url",
                     project.findProperty("robolectricRepo")?.toString() ?: "https://repo.maven.apache.org/maven2",
                 )
-                // Live API smoke test is opt-in: ./gradlew testDebugUnitTest -PliveApi
+                // Robolectric screenshot tests are slow: only with -Pscreenshots (e.g. recordRoborazziDebug -Pscreenshots).
+                if (!project.hasProperty("screenshots")) test.exclude("**/ScreenshotTest*")
+                // Live API tests are opt-in: ./gradlew testDebugUnitTest -PliveApi --tests '*LiveApiTest'
                 test.systemProperty("liveApi", project.hasProperty("liveApi").toString())
             }
         }

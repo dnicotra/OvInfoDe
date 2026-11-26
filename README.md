@@ -36,9 +36,9 @@ Requirements: JDK 17+ and the Android SDK (platform 37.2 is downloaded automatic
 
 ```sh
 ./gradlew assembleRelease          # app/build/outputs/apk/release/app-release.apk
-./gradlew testDebugUnitTest        # unit + screenshot tests (offline, recorded API data)
-./gradlew testDebugUnitTest -PliveApi --tests '*LiveApiTest'   # smoke test against the real API
-./gradlew recordRoborazziDebug     # re-render docs/screenshots/
+./gradlew testDebugUnitTest        # unit tests on recorded API data, offline (~10 s)
+./gradlew testDebugUnitTest -PliveApi --tests '*LiveApiTest'   # checks against the real API (~15 s)
+./gradlew recordRoborazziDebug -Pscreenshots   # re-render docs/screenshots/ (slow, Robolectric)
 ```
 
 ## Code overview
