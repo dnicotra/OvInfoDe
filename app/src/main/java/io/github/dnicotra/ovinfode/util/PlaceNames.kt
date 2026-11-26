@@ -21,12 +21,15 @@ fun placeKey(place: NamedPlace): String =
     place.id?.let { id -> dhid.find(id)?.let { "de:${it.groupValues[1]}:${it.groupValues[2]}" } ?: id }
         ?: String.format(Locale.ROOT, "%.4f,%.4f", place.lat, place.lon)
 
+// "Karlsruhe Hbf", "Homburg (Saar) Hbf", "Fulda Bf (tief)": a station named after its town.
+private val townStation = Regex("""^.*\S (?:Hbf|Bf)(?: \(.*\))?$""")
+
 /**
- * True when [name] may be missing its town: it is not written as "Town, Stop" and the place
- * is not in the same district as the stop the user is looking at ([contextStopId]).
+ * True when [name] may be missing its town: it is not written as "Town, Stop" or "Town Hbf",
+ * and the place is not in the same district as the stop the user is looking at ([contextStopId]).
  */
 fun needsTown(name: String, stopId: String?, contextStopId: String?): Boolean {
-    if (name.contains(',')) return false
+    if (name.contains(',') || townStation.matches(name)) return false
     val district = districtOf(stopId)
     val context = districtOf(contextStopId)
     return district == null || context == null || district != context

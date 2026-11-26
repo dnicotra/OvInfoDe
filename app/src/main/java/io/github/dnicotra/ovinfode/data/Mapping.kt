@@ -15,6 +15,7 @@ import io.github.dnicotra.ovinfode.data.model.StopDepartures
 import io.github.dnicotra.ovinfode.data.model.TransportMode
 import io.github.dnicotra.ovinfode.data.model.Trip
 import io.github.dnicotra.ovinfode.data.model.TripStop
+import io.github.dnicotra.ovinfode.util.shortStopName
 import java.time.Instant
 import java.time.OffsetDateTime
 
@@ -49,7 +50,7 @@ private fun List<AlertDto>?.toAlerts(): List<Alert> =
 
 fun MatchDto.toStop(): Stop = Stop(
     id = id,
-    name = name,
+    name = shortStopName(name),
     lat = lat,
     lon = lon,
     area = areas.firstOrNull { it.default == true }?.name,
@@ -58,7 +59,7 @@ fun MatchDto.toStop(): Stop = Stop(
 
 fun PlaceDto.toStop(): Stop = Stop(
     id = stopId ?: "$lat,$lon",
-    name = name,
+    name = shortStopName(name),
     lat = lat,
     lon = lon,
     modes = modes.orEmpty().map(TransportMode::fromApi).toSortedSet(),
@@ -94,7 +95,7 @@ fun StopTimeDto.toDepartureOrNull(): Departure? {
     return Departure(
         tripId = tripId,
         line = lineOf(mode, displayName, routeShortName, tripShortName, routeColor, routeTextColor),
-        headsign = headsign?.takeIf { it.isNotBlank() } ?: tripTo?.name ?: "",
+        headsign = shortStopName(headsign?.takeIf { it.isNotBlank() } ?: tripTo?.name ?: ""),
         scheduled = scheduled,
         estimated = estimated,
         platform = place.platformOrNull(),
@@ -102,9 +103,9 @@ fun StopTimeDto.toDepartureOrNull(): Departure? {
         cancelled = cancelled || tripCancelled || place.cancelled == true,
         operator = agencyName?.takeIf { it.isNotBlank() },
         stopId = place.stopId,
-        stopName = place.name,
+        stopName = shortStopName(place.name),
         tripNumber = tripShortName?.takeIf { it.isNotBlank() },
-        destination = tripTo?.let { NamedPlace(it.stopId, it.name, it.lat, it.lon) },
+        destination = tripTo?.let { NamedPlace(it.stopId, shortStopName(it.name), it.lat, it.lon) },
     )
 }
 
@@ -125,7 +126,7 @@ fun StopTimesResponse.toStopDepartures(): StopDepartures {
 
 private fun PlaceDto.toTripStop(realtime: Boolean): TripStop = TripStop(
     id = stopId,
-    name = name,
+    name = shortStopName(name),
     lat = lat,
     lon = lon,
     scheduledArrival = parseInstant(scheduledArrival),
@@ -152,7 +153,7 @@ fun ItineraryDto.toTrip(tripId: String): Trip {
     return Trip(
         id = tripId,
         line = lineOf(first.mode, first.displayName, first.routeShortName, first.tripShortName, first.routeColor, first.routeTextColor),
-        headsign = first.headsign?.takeIf { it.isNotBlank() } ?: transitLegs.last().to.name,
+        headsign = shortStopName(first.headsign?.takeIf { it.isNotBlank() } ?: transitLegs.last().to.name),
         operator = first.agencyName?.takeIf { it.isNotBlank() },
         tripNumber = first.tripShortName?.takeIf { it.isNotBlank() },
         isRealtime = transitLegs.any { it.realTime },

@@ -15,6 +15,7 @@ import io.github.dnicotra.ovinfode.util.distanceMeters
 import io.github.dnicotra.ovinfode.util.needsTown
 import io.github.dnicotra.ovinfode.util.placeKey
 import io.github.dnicotra.ovinfode.util.qualifyName
+import io.github.dnicotra.ovinfode.util.shortStopName
 import kotlinx.serialization.SerializationException
 import java.io.IOException
 import kotlin.coroutines.cancellation.CancellationException
@@ -66,7 +67,7 @@ class TransitRepository(
         if (candidates.isEmpty()) return trip
         val known = towns.towns(candidates)
         if (known.isEmpty()) return trip
-        val stops = trip.stops.map { stop -> known[placeKey(stop.place)]?.let { stop.copy(name = qualifyName(stop.name, it)) } ?: stop }
+        val stops = trip.stops.map { stop -> known[placeKey(stop.place)]?.let { stop.copy(name = shortStopName(qualifyName(stop.name, it))) } ?: stop }
         val headsign = if (trip.headsign == trip.stops.lastOrNull()?.name) stops.last().name else trip.headsign
         return trip.copy(stops = stops, headsign = headsign)
     }
@@ -81,7 +82,7 @@ class TransitRepository(
         if (known.isEmpty()) return departures
         return departures.map { departure ->
             val town = departure.candidate()?.let { known[placeKey(it)] }
-            if (town != null) departure.copy(headsign = qualifyName(departure.headsign, town)) else departure
+            if (town != null) departure.copy(headsign = shortStopName(qualifyName(departure.headsign, town))) else departure
         }
     }
 }

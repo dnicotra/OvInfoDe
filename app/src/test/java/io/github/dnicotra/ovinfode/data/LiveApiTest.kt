@@ -48,6 +48,7 @@ class LiveApiTest {
                 stop.name.take(36), departures.size, realtime, departures.count { it.cancelled },
                 departures.map { it.line.mode }.distinct().sorted()))
 
+            println("    " + departures.map { it.headsign }.distinct().take(12).joinToString(" | "))
             if (departures.isEmpty()) problems += "${stop.name}: no departures"
             departures.filter { it.headsign.isBlank() }.forEach { problems += "${stop.name}: ${it.line.name} has no destination" }
             // A bare "Hauptbahnhof" is only acceptable for destinations in the same city.
@@ -90,6 +91,6 @@ class LiveApiTest {
     fun `nearby stops around Cologne cathedral`() = runBlocking {
         val nearby = repository.nearbyStops(LatLon(50.9420, 6.9580))
         println("nearby: " + nearby.joinToString { "${it.stop.name} ${it.distanceMeters} m" })
-        assertTrue(nearby.any { it.stop.name.contains("Dom") || it.stop.name.contains("Hauptbahnhof") })
+        assertTrue(nearby.any { it.stop.name.contains("Dom") || it.stop.name.contains("Hbf") })
     }
 }
