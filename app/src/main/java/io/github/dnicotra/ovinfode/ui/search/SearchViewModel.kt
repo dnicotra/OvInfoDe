@@ -31,15 +31,29 @@ data class SearchUiState(
     val searched: Boolean = false,
 )
 
+/** Results with their distance from [here], nearest first; without a location the API's order is kept. */
+fun rankByDistance(stops: List<Stop>, here: LatLon?): List<SearchResult> =
+    stops.map { stop -> SearchResult(stop, here?.let { distanceMeters(it, stop.location).toInt() }) }
+        .sortedWith(compareBy(nullsLast()) { it.distanceMeters })
+
 @OptIn(FlowPreview::class)
 class SearchViewModel(container: AppContainer) : ViewModel() {
     private val repository = container.repository
-    private val here: LatLon? = container.location.lastKnown()
+    private val location = container.location
+    @Volatile private var here: LatLon? = location.lastKnown()
 
     private val _state = MutableStateFlow(SearchUiState())
     val state: StateFlow<SearchUiState> = _state.asStateFlow()
 
     init {
+        // No cached position: get a fresh one and re-sort whatever is shown by then.
+        if (here == null && location.hasPermission()) {
+            viewModelScope.launch {
+                val fresh = location.currentLocation() ?: return@launch
+                here = fresh
+                _state.update { s -> s.copy(results = rankByDistance(s.results.map { it.stop }, fresh)) }
+            }
+        }
         viewModelScope.launch {
             _state.map { it.query.trim() }
                 .distinctUntilChanged()
@@ -62,8 +76,7 @@ class SearchViewModel(container: AppContainer) : ViewModel() {
         _state.update { it.copy(loading = true, error = null) }
         safeCall { repository.searchStops(query, here) }
             .onSuccess { stops ->
-                val results = stops.map { stop -> SearchResult(stop, here?.let { distanceMeters(it, stop.location).toInt() }) }
-                _state.update { it.copy(loading = false, results = results, searched = true) }
+                _state.update { it.copy(loading = false, results = rankByDistance(stops, here), searched = true) }
             }
             .onFailure { e -> _state.update { it.copy(loading = false, error = e.toErrorKind(), searched = true) } }
     }
