@@ -110,6 +110,36 @@ class TransitRepositoryTest {
     }
 
     @Test
+    fun `dutch boards and trips need no town lookups`() = runBlocking {
+        val fake = FakeTransitous(
+            mapOf(
+                "/api/v6/stoptimes" to "stoptimes_amsterdam_centraal.json",
+                "/api/v6/trip" to "trip_ic2735.json",
+            ),
+        )
+        val repository = TransitRepository(fake.api)
+        val amsterdam = Stop("de-DELFI_000008400058", "Amsterdam Centraal", 52.37919, 4.899431)
+
+        val departures = repository.departures(amsterdam, count = 30).departures
+        assertEquals("Maastricht", repository.trip("20261126_09:27_nl-OpenOV_395288670", contextStopId = "nl-OpenOV_2992187").headsign)
+
+        assertEquals(34, departures.size)
+        // Before, every bare destination ("Uitgeest", "Heerlen") cost a lookup and up to 2.5 s.
+        assertEquals(0, fake.requestsTo("/api/v1/reverse-geocode").size)
+        assertEquals(listOf("Uitgeest", "Hoofddorp"), departures.drop(1).take(2).map { it.headsign })
+    }
+
+    @Test
+    fun `nearby stops in Amsterdam`() = runBlocking {
+        val fake = FakeTransitous(mapOf("/api/v6/map/stops" to "mapstops_amsterdam_dam.json"))
+        val nearby = TransitRepository(fake.api).nearbyStops(LatLon(52.37310, 4.89260))
+
+        assertEquals("Amsterdam, Dam", nearby.first().stop.name)
+        assertEquals(nearby.map { it.distanceMeters }.sorted(), nearby.map { it.distanceMeters })
+        assertEquals(4, nearby.size)
+    }
+
+    @Test
     fun `server errors become ApiException and map to SERVER`() = runBlocking {
         val fake = FakeTransitous(override = { 500 to """{"error":"internal"}""" })
         try {

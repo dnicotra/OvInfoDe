@@ -4,9 +4,8 @@ import io.github.dnicotra.ovinfode.data.model.NamedPlace
 import java.util.Locale
 
 /*
- * Some local networks name their stops without the town: in the national DELFI data,
- * Stuttgart Hbf is just "Hauptbahnhof". That is fine on a Stuttgart departure board, but an
- * ICE from Heidelberg "to Hauptbahnhof" is useless. These rules decide when to add the town.
+ * Helpers for adding the town to stop names that lack it (see Country.needsTown, which
+ * decides when that is needed, country by country).
  */
 
 // German stop ids (DHID) look like "de:08111:6115:2:3": country, district key, station, platform.
@@ -20,20 +19,6 @@ fun districtOf(stopId: String?): String? = stopId?.let { dhid.find(it)?.groupVal
 fun placeKey(place: NamedPlace): String =
     place.id?.let { id -> dhid.find(id)?.let { "de:${it.groupValues[1]}:${it.groupValues[2]}" } ?: id }
         ?: String.format(Locale.ROOT, "%.4f,%.4f", place.lat, place.lon)
-
-// "Karlsruhe Hbf", "Homburg (Saar) Hbf", "Fulda Bf (tief)": a station named after its town.
-private val townStation = Regex("""^.*\S (?:Hbf|Bf)(?: \(.*\))?$""")
-
-/**
- * True when [name] may be missing its town: it is not written as "Town, Stop" or "Town Hbf",
- * and the place is not in the same district as the stop the user is looking at ([contextStopId]).
- */
-fun needsTown(name: String, stopId: String?, contextStopId: String?): Boolean {
-    if (name.contains(',') || townStation.matches(name)) return false
-    val district = districtOf(stopId)
-    val context = districtOf(contextStopId)
-    return district == null || context == null || district != context
-}
 
 /** "Hauptbahnhof" + "Stuttgart" → "Stuttgart, Hauptbahnhof"; names that already mention the town are kept. */
 fun qualifyName(name: String, town: String?): String {

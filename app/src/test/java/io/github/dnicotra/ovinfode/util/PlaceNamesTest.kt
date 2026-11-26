@@ -2,9 +2,7 @@ package io.github.dnicotra.ovinfode.util
 
 import io.github.dnicotra.ovinfode.data.model.NamedPlace
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class PlaceNamesTest {
@@ -27,23 +25,6 @@ class PlaceNamesTest {
         assertEquals("de:06412:10", key("de-DELFI_de:06412:10_G"))
         assertEquals("be-sncb_8015345", key("be-sncb_8015345"))
         assertEquals("48.7855,9.1824", key(null))
-    }
-
-    @Test
-    fun `town is only needed for bare names in another district`() {
-        val heidelberg = "de-DELFI_de:08221:1160:5:8"
-        assertTrue(needsTown("Hauptbahnhof", "de-DELFI_de:08111:6115:2:3", heidelberg))
-        // Seen from Stuttgart itself, "Hauptbahnhof" is clear.
-        assertFalse(needsTown("Hauptbahnhof", "de-DELFI_de:08111:6115:2:3", "de-DELFI_de:08111:5006"))
-        // "Town, Stop" already names the town.
-        assertFalse(needsTown("Mannheim, Hauptbahnhof", "de-DELFI_de:08222:2417:8:9", heidelberg))
-        // "Town Hbf" names its town too; a bare "Hbf" does not.
-        assertFalse(needsTown("Karlsruhe Hbf", "de-DELFI_de:08212:90:4:5", heidelberg))
-        assertFalse(needsTown("Homburg (Saar) Hbf", "de-DELFI_de:10045:8000176", heidelberg))
-        assertTrue(needsTown("Hbf", "de-DELFI_de:08111:6115:2:3", heidelberg))
-        assertTrue(needsTown("Hbf (tief)", "de-DELFI_de:08111:6115:2:3", heidelberg))
-        // Without German ids we cannot tell.
-        assertTrue(needsTown("Messe", "be-sncb_8015345", heidelberg))
     }
 
     @Test

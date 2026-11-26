@@ -144,6 +144,23 @@ class ScreenshotTest {
         }
     }
 
+    /** Amsterdam Centraal in Dutch: NS trains as "IC"/"SPR" in NS yellow, the metro with its line colours. */
+    @Test
+    @Config(qualifiers = "nl-rNL-w400dp-h860dp-xxhdpi")
+    fun departuresAmsterdam() {
+        TimeZone.setDefault(TimeZone.getTimeZone("Europe/Amsterdam"))
+        val fake = FakeTransitous(mapOf("/api/v6/stoptimes" to "stoptimes_amsterdam_centraal.json"))
+        val stop = Stop(
+            "de-DELFI_000008400058", "Amsterdam Centraal", 52.37919, 4.899431, "Amsterdam",
+            sortedSetOf(TransportMode.LONG_DISTANCE, TransportMode.REGIONAL, TransportMode.SUBWAY, TransportMode.TRAM, TransportMode.BUS),
+        )
+        val board = runBlocking { TransitRepository(fake.api).departures(stop, 30) }
+        val now = Instant.parse("2026-11-26T09:12:40Z")
+        capture("departures_amsterdam") {
+            Board(DeparturesUiState(stop, loading = false, departures = board.departures, lastUpdated = now), DepartureViewMode.BY_TIME, now)
+        }
+    }
+
     @Test
     fun homeNearby() {
         val here = LatLon(50.9420, 6.9580)

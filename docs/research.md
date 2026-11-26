@@ -62,3 +62,25 @@ Germany has no exact OVapi equivalent, but the national DELFI data (all operator
 - Every request sends a `User-Agent` with app name, version and a contact (the app sends `Abfahrten/<version> (Android; +<repository URL>)`).
 - Link to https://transitous.org/sources/ visibly and follow OpenStreetMap attribution (done in the footer of each list and in the About screen).
 - Keep the load light: the app refreshes an open departure board every 30 s and the home screen every 90 s, only while visible, and never uses the expensive `/plan` endpoints.
+
+## 4. The Netherlands
+
+*Added November 2026, when the app learned to work in the Netherlands.*
+
+Transitous also covers the Netherlands, from the national **[OpenOV](https://gtfs.openov.nl)** feeds: the timetable of every operator as GTFS (CC0) plus GTFS-Realtime feeds for trains, for all other vehicles and for service alerts. It is the same national data that OVapi (the API behind OVinfo) is built from. So the app uses Transitous for the Netherlands too, rather than a second client for OVapi: one API, one data model, one attribution.
+
+The API calls are the same as for Germany. What differs is how the data looks. These are recorded responses from 2026-11-26 (Amsterdam Centraal, Utrecht Centraal, Amsterdam Leidseplein, an NS Intercity and a train added in real time):
+
+| Aspect | Dutch data | What the app does |
+|---|---|---|
+| Stop ids | `nl-OpenOV_3980180`, `nl-OpenOV_NL:S:30009577`; big stations also come with ids of other feeds: `de-DELFI_000008400058` (Amsterdam Centraal), `fr-eurostar-…_rotterdam_centraal_station_area`, Flixbus | the country is taken from a country code in the id, else from border outlines; the feed prefix alone is wrong for these stations |
+| Stop names | "Amsterdam, Leidseplein" for bus, tram and metro (as in OVapi), "Utrecht Centraal" for stations, "Rotterdam, Rotterdam Centraal", "'s-Gravenhage, Centraal Station" | kept, except the repeated town and the official name of The Hague ("Den Haag") |
+| Destinations | always with their town (or a station named after it) | no town lookups. Before, every destination like "Maastricht" cost a reverse-geocoding request, delaying a new board by up to 2.5 s |
+| Lines | NS: route name "Intercity" / "Sprinter", train number in `tripShortName`; "ICD 1835", "ECD 9528"; Arriva/Blauwnet line numbers (RS1, RE18, IC23); "Snelbus ipv trein" for rail replacement buses | IC / SPR (as on the platforms), "Snelbus"; trains without a route colour in NS yellow with NS blue |
+| Trains added in real time | mode `OTHER`, every name "?", trip id `…:IFF:IC:303531` | named and classified from the train type in the id. When NS replaces a train by cancelling it and adding one at the same time, only the running one is shown |
+| Modes | all domestic NS trains, Intercity included, are `REGIONAL_RAIL`; ICD/ECD/ICE are `LONG_DISTANCE` | the filter says "Train" instead of "Regional"; metro instead of U-Bahn |
+| Platforms | "5a", "11a" for trains; letters and bays ("B2", "K") for bus and tram | shown as "Spoor 5a" / "Perron B2" in Dutch |
+| Alerts | GVB sends both languages in one text: "Tram 5 stopt hier niet. … -- Stop not served by tram 5. …", and cuts the header off after 140 characters | the Dutch half for Dutch readers, the English one for everyone else; a cut-off header is replaced by the full description |
+| Real-time | NS trains nearly always; city buses and trams partly | as in Germany: green/red only with real-time data |
+
+The country-specific rules live in `app/src/main/java/io/github/dnicotra/ovinfode/country/` (see the README for how to add another country).

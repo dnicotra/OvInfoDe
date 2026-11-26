@@ -1,5 +1,7 @@
 package io.github.dnicotra.ovinfode.data
 
+import io.github.dnicotra.ovinfode.country.Netherlands
+import io.github.dnicotra.ovinfode.country.country
 import io.github.dnicotra.ovinfode.data.api.TransitousApi
 import io.github.dnicotra.ovinfode.data.model.LatLon
 import io.github.dnicotra.ovinfode.data.model.TransportMode
@@ -7,11 +9,13 @@ import io.github.dnicotra.ovinfode.util.districtOf
 import io.github.dnicotra.ovinfode.util.indexOfStop
 import io.github.dnicotra.ovinfode.util.vehiclePosition
 import kotlinx.coroutines.runBlocking
+import okhttp3.OkHttpClient
 import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
 import java.time.Instant
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Checks the app's data layer against the real Transitous API (plain JVM, no emulator).
@@ -20,7 +24,18 @@ import java.time.Instant
  * Keep it small: Transitous is a volunteer-run service.
  */
 class LiveApiTest {
-    private val repository = TransitRepository(TransitousApi(userAgent = "Abfahrten-tests/0.1"))
+    private val townLookups = AtomicInteger()
+    private val repository = TransitRepository(
+        TransitousApi(
+            userAgent = "Abfahrten-tests/0.1",
+            client = OkHttpClient.Builder()
+                .addInterceptor { chain ->
+                    if (chain.request().url.encodedPath.endsWith("reverse-geocode")) townLookups.incrementAndGet()
+                    chain.proceed(chain.request())
+                }
+                .build(),
+        ),
+    )
 
     /** Destination names that say nothing without a town. */
     private val bareNames = setOf("hauptbahnhof", "hbf", "bahnhof", "bf", "zob", "busbahnhof")
@@ -109,6 +124,57 @@ class LiveApiTest {
             println("'$query' → ${first?.name} (${first?.area})")
             assertTrue("'$query' gave ${first?.name}", first != null && first.name.contains(expected))
         }
+    }
+
+    @Test
+    fun `dutch departure boards use Dutch line names and need no town lookups`() = runBlocking {
+        val problems = mutableListOf<String>()
+        val stations = listOf(
+            "Amsterdam Centraal", "Utrecht Centraal", "Rotterdam Centraal", "Den Haag Centraal",
+            "Groningen", "Maastricht", "Amsterdam, Leidseplein",
+        )
+        for (query in stations) {
+            val stop = repository.searchStops(query, near = null).firstOrNull()
+            if (stop == null || stop.country() != Netherlands) {
+                problems += "$query: found ${stop?.name} (${stop?.id}, ${stop?.country()})"
+                continue
+            }
+            val before = townLookups.get()
+            val departures = repository.departures(stop, count = 30).departures
+            val lookups = townLookups.get() - before
+            println(String.format("%-36s %3d departures  %2d lookups  lines %s", stop.name.take(36), departures.size, lookups,
+                departures.map { it.line.name }.distinct().take(14)))
+            println("    " + departures.map { it.headsign }.distinct().take(12).joinToString(" | "))
+            if (departures.isEmpty()) problems += "${stop.name}: no departures"
+            // Only destinations abroad (Aachen, Liège from Maastricht) may need one.
+            val abroad = departures.mapNotNull { it.destination }.filter { it.country() != Netherlands }.distinctBy { it.name }
+            if (lookups > abroad.size) problems += "${stop.name}: $lookups town lookups for ${abroad.map { it.name }}"
+            departures.filter { it.headsign.isBlank() }.forEach { problems += "${stop.name}: ${it.line.name} has no destination" }
+            departures.filter { it.line.name in setOf("Intercity", "Sprinter", "?") }
+                .forEach { problems += "${stop.name}: line '${it.line.name}' (${it.tripId})" }
+        }
+        assertTrue(problems.joinToString("\n"), problems.isEmpty())
+    }
+
+    @Test
+    fun `dutch train trip opens with its stops`() = runBlocking {
+        val stop = repository.searchStops("Utrecht Centraal", near = null).first()
+        val departure = repository.departures(stop, count = 40).departures
+            .firstOrNull { it.line.name == "IC" && !it.cancelled && !it.tripId.contains(":IFF:") }
+        assumeTrue("no Intercity right now", departure != null)
+        departure!!
+        val trip = repository.trip(departure.tripId, contextStopId = departure.stopId)
+        println("${trip.line.name} ${trip.tripNumber} → ${trip.headsign}: " + trip.stops.joinToString(" – ") { "${it.name} (${it.platform})" })
+        assertTrue("too few stops", trip.stops.size >= 2)
+        assertTrue("origin stop not found", indexOfStop(trip.stops, departure.stopId, departure.stopName) >= 0)
+        assertTrue("no platforms", trip.stops.any { it.platform != null })
+    }
+
+    @Test
+    fun `nearby stops around Amsterdam Dam`() = runBlocking {
+        val nearby = repository.nearbyStops(LatLon(52.3731, 4.8926))
+        println("nearby: " + nearby.joinToString { "${it.stop.name} ${it.distanceMeters} m" })
+        assertTrue(nearby.any { it.stop.name == "Amsterdam, Dam" })
     }
 
     @Test

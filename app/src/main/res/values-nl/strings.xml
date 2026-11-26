@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Abfahrten</string>
+
+    <!-- Navigation / actions -->
+    <string name="back">Terug</string>
+    <string name="about">Info</string>
+    <string name="refresh">Vernieuwen</string>
+    <string name="retry">Opnieuw proberen</string>
+    <string name="favorite_add">Toevoegen aan favorieten</string>
+    <string name="favorite_remove">Verwijderen uit favorieten</string>
+
+    <!-- Home -->
+    <string name="search_hint">Zoek halte of station</string>
+    <string name="tab_nearby">In de buurt</string>
+    <string name="tab_favorites">Favorieten</string>
+    <string name="location_permission_title">Vertrektijden bij jou in de buurt</string>
+    <string name="location_permission_text">Geef toegang tot je locatie om de vertrektijden van de dichtstbijzijnde haltes te zien. Je locatie wordt alleen gebruikt om haltes in de buurt te vinden.</string>
+    <string name="location_permission_button">Locatie toestaan</string>
+    <string name="locating">Locatie bepalen …</string>
+    <string name="location_unavailable">Je locatie kon niet worden bepaald. Staat locatiebepaling aan?</string>
+    <string name="approximate_location">Alleen je geschatte locatie wordt gedeeld, dus de haltes in de buurt kunnen onnauwkeurig zijn.</string>
+    <string name="no_nearby_stops">Geen haltes in de buurt gevonden.</string>
+    <string name="favorites_empty">Nog geen favorieten. Tik bij de vertrektijden van een halte op de ster om die hier te bewaren.</string>
+    <string name="no_upcoming_departures">Voorlopig geen vertrekken</string>
+
+    <!-- Errors -->
+    <string name="error_network">Geen verbinding. Controleer je internetverbinding.</string>
+    <string name="error_server">De reisinformatiedienst reageert op dit moment niet.</string>
+    <string name="error_not_found">Niet gevonden.</string>
+    <string name="error_unknown">Er is iets misgegaan.</string>
+    <string name="refresh_failed">Bijwerken mislukt – stand van %1$s</string>
+
+    <!-- Departures -->
+    <string name="updated_at">Bijgewerkt %1$s</string>
+    <string name="no_departures">Geen vertrekken in de komende uren.</string>
+    <string name="load_more">Latere vertrekken</string>
+    <string name="filter_all">Alle</string>
+    <string name="view_time">Op vertrektijd</string>
+    <string name="view_line">Per lijn</string>
+    <string name="now">nu</string>
+    <string name="minutes_short">%1$d min</string>
+    <string name="cancelled">Rijdt niet</string>
+    <string name="platform_rail">Spoor %1$s</string>
+    <string name="platform_other">Perron %1$s</string>
+    <plurals name="alerts_count">
+        <item quantity="one">%1$d melding</item>
+        <item quantity="other">%1$d meldingen</item>
+    </plurals>
+
+    <!-- Trip -->
+    <string name="realtime_data">Actuele gegevens</string>
+    <string name="schedule_only">Alleen dienstregeling (geen actuele gegevens)</string>
+    <string name="trip_cancelled">Deze rit rijdt niet</string>
+    <string name="stop_cancelled">Halte vervalt</string>
+    <string name="vehicle_between">Onderweg</string>
+    <string name="vehicle_at_stop">Staat nu hier</string>
+    <string name="vehicle_not_started">Nog niet vertrokken</string>
+    <string name="vehicle_finished">Aangekomen op de eindbestemming</string>
+    <string name="trip_number">Rit %1$s</string>
+    <string name="departures_from">Vertrekken vanaf %1$s</string>
+    <string name="open_departures">Vertrektijden tonen</string>
+
+    <!-- Search -->
+    <string name="search_empty">Geen haltes gevonden.</string>
+    <string name="search_min_chars">Typ minstens twee letters.</string>
+
+    <!-- Distances -->
+    <string name="distance_m">%1$d m</string>
+    <string name="distance_km">%1$s km</string>
+
+    <!-- Modes -->
+    <string name="mode_long_distance">Lange afstand</string>
+    <string name="mode_regional">Regionaal</string>
+    <string name="mode_train">Trein</string>
+    <string name="mode_suburban">S-trein</string>
+    <string name="mode_suburban_de">S-Bahn</string>
+    <string name="mode_subway">Metro</string>
+    <string name="mode_subway_de">U-Bahn</string>
+    <string name="mode_tram">Tram</string>
+    <string name="mode_bus">Bus</string>
+    <string name="mode_coach">Langeafstandsbus</string>
+    <string name="mode_ferry">Veerboot</string>
+    <string name="mode_cable">Kabelbaan</string>
+    <string name="mode_on_demand">Belbus</string>
+    <string name="mode_other">Overig</string>
+
+    <!-- Attribution / about -->
+    <string name="attribution">Gegevens: Transitous · © OpenStreetMap-bijdragers</string>
+    <string name="about_description">Actuele vertrektijden van bus, tram, metro en trein in Nederland en Duitsland (en daarbuiten): haltes in de buurt, favorieten, vertragingen en uitval in één oogopslag.</string>
+    <string name="about_version">Versie %1$s</string>
+    <string name="about_data_title">Gegevensbronnen</string>
+    <string name="about_data_text">Dienstregelingen en actuele gegevens komen van Transitous, een gratis openbaarvervoerdienst die door vrijwilligers wordt beheerd. Voor Nederland gebruikt Transitous de landelijke dienstregeling en actuele gegevens van OpenOV, voor Duitsland die van DELFI. Haltes en kaarten zijn gebaseerd op OpenStreetMap.</string>
+    <string name="about_link_sources">Gegevensbronnen en licenties van Transitous</string>
+    <string name="about_link_osm">Auteursrecht van OpenStreetMap</string>
+    <string name="about_link_donate">Steun Transitous met een donatie</string>
+    <string name="about_privacy_title">Privacy</string>
+    <string name="about_privacy_text">De app heeft geen account, geen advertenties en geen tracking. Om haltes in de buurt te vinden, wordt het gebied rond je locatie naar de server van Transitous gestuurd. Favorieten worden alleen op dit apparaat opgeslagen.</string>
+    <string name="about_source_title">Broncode</string>
+    <string name="about_link_source">Broncode op GitHub</string>
+    <string name="about_license">Vrije software onder de GNU General Public License, versie 3 of later.</string>
+    <string name="about_legend_title">Kleuren</string>
+    <string name="about_legend_ontime">Groen: op tijd (actuele gegevens)</string>
+    <string name="about_legend_delayed">Rood: vertraagd, rijdt niet of spoorwijziging</string>
+    <string name="about_legend_schedule">Neutraal: alleen dienstregeling, geen actuele gegevens</string>
+</resources>

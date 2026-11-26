@@ -1,5 +1,6 @@
 package io.github.dnicotra.ovinfode.data
 
+import io.github.dnicotra.ovinfode.country.country
 import io.github.dnicotra.ovinfode.data.api.ApiException
 import io.github.dnicotra.ovinfode.data.api.TransitousApi
 import io.github.dnicotra.ovinfode.data.model.Departure
@@ -12,10 +13,8 @@ import io.github.dnicotra.ovinfode.data.model.StopDepartures
 import io.github.dnicotra.ovinfode.data.model.Trip
 import io.github.dnicotra.ovinfode.util.boundingBox
 import io.github.dnicotra.ovinfode.util.distanceMeters
-import io.github.dnicotra.ovinfode.util.needsTown
 import io.github.dnicotra.ovinfode.util.placeKey
 import io.github.dnicotra.ovinfode.util.qualifyName
-import io.github.dnicotra.ovinfode.util.shortStopName
 import kotlinx.serialization.SerializationException
 import java.io.IOException
 import kotlin.coroutines.cancellation.CancellationException
@@ -63,27 +62,29 @@ class TransitRepository(
     suspend fun trip(tripId: String, contextStopId: String? = null): Trip {
         val trip = api.trip(tripId).toTrip(tripId)
         val context = contextStopId ?: trip.stops.firstOrNull()?.id
-        val candidates = trip.stops.filter { needsTown(it.name, it.id, context) }.map { it.place }
+        val candidates = trip.stops.map { it.place }.filter { it.country().needsTown(it, context) }
         if (candidates.isEmpty()) return trip
         val known = towns.towns(candidates)
         if (known.isEmpty()) return trip
-        val stops = trip.stops.map { stop -> known[placeKey(stop.place)]?.let { stop.copy(name = shortStopName(qualifyName(stop.name, it))) } ?: stop }
+        val stops = trip.stops.map { stop ->
+            known[placeKey(stop.place)]?.let { town -> stop.copy(name = stop.place.country().stopName(qualifyName(stop.name, town))) } ?: stop
+        }
         val headsign = if (trip.headsign == trip.stops.lastOrNull()?.name) stops.last().name else trip.headsign
         return trip.copy(stops = stops, headsign = headsign)
     }
 
-    /** Adds the town to destinations like "Hauptbahnhof" that lie elsewhere (see [needsTown]). */
+    /** Adds the town to destinations like "Hauptbahnhof" that lie elsewhere (see [io.github.dnicotra.ovinfode.country.Country.needsTown]). */
     private suspend fun withTowns(departures: List<Departure>, contextStopId: String?): List<Departure> {
         // Only when the headsign is the bare name of the final stop; other headsigns are written by the operator.
-        fun Departure.candidate(): NamedPlace? = destination?.takeIf { headsign == it.name && needsTown(it.name, it.id, contextStopId) }
+        fun Departure.candidate(): NamedPlace? = destination?.takeIf { headsign == it.name && it.country().needsTown(it, contextStopId) }
         val candidates = departures.mapNotNull { it.candidate() }
         if (candidates.isEmpty()) return departures
         val known = towns.towns(candidates)
         if (known.isEmpty()) return departures
         return departures.map { departure ->
-            val town = departure.candidate()?.let { known[placeKey(it)] }
-            if (town == null) return@map departure
-            val name = shortStopName(qualifyName(departure.headsign, town))
+            val destination = departure.candidate() ?: return@map departure
+            val town = known[placeKey(destination)] ?: return@map departure
+            val name = destination.country().stopName(qualifyName(departure.headsign, town))
             departure.copy(headsign = name, destination = departure.destination?.copy(name = name))
         }
     }

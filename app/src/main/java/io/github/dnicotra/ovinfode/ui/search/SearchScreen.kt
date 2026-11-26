@@ -48,6 +48,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.dnicotra.ovinfode.R
+import io.github.dnicotra.ovinfode.country.country
 import io.github.dnicotra.ovinfode.data.model.Stop
 import io.github.dnicotra.ovinfode.ui.components.CenteredMessage
 import io.github.dnicotra.ovinfode.ui.components.ErrorMessage
@@ -138,7 +139,7 @@ private fun SearchResultItem(result: SearchResult, onClick: () -> Unit) {
         leadingContent = { Icon(Icons.Filled.Place, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
         supportingContent = {
             Row {
-                ModeIcons(result.stop.modes)
+                ModeIcons(result.stop.modes, remember(result.stop.id) { result.stop.country() })
                 result.stop.area?.takeIf { !result.stop.name.contains(it) }?.let {
                     if (result.stop.modes.isNotEmpty()) Spacer(Modifier.width(8.dp))
                     Text(it, maxLines = 1, overflow = TextOverflow.Ellipsis)
