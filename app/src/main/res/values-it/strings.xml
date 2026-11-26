@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Abfahrten</string>
+
+    <!-- Navigation / actions -->
+    <string name="back">Indietro</string>
+    <string name="about">Info</string>
+    <string name="refresh">Aggiorna</string>
+    <string name="retry">Riprova</string>
+    <string name="favorite_add">Aggiungi ai preferiti</string>
+    <string name="favorite_remove">Rimuovi dai preferiti</string>
+
+    <!-- Home -->
+    <string name="search_hint">Cerca fermata o stazione</string>
+    <string name="tab_nearby">Vicino a te</string>
+    <string name="tab_favorites">Preferiti</string>
+    <string name="location_permission_title">Partenze vicino a te</string>
+    <string name="location_permission_text">Consenti l\'accesso alla posizione per vedere le partenze dalle fermate più vicine. La posizione serve solo a trovare le fermate intorno a te.</string>
+    <string name="location_permission_button">Consenti posizione</string>
+    <string name="locating">Ricerca della posizione…</string>
+    <string name="location_unavailable">Non è stato possibile determinare la tua posizione. La localizzazione è attiva?</string>
+    <string name="approximate_location">Viene condivisa solo la posizione approssimativa, quindi le fermate vicine potrebbero non essere precise.</string>
+    <string name="no_nearby_stops">Nessuna fermata nelle vicinanze.</string>
+    <string name="favorites_empty">Ancora nessun preferito. Tocca la stella nel tabellone delle partenze per tenere qui una fermata.</string>
+    <string name="no_upcoming_departures">Nessuna partenza a breve</string>
+
+    <!-- Errors -->
+    <string name="error_network">Nessuna connessione. Controlla la connessione a Internet.</string>
+    <string name="error_server">Il servizio orari non risponde al momento.</string>
+    <string name="error_not_found">Non trovato.</string>
+    <string name="error_unknown">Qualcosa è andato storto.</string>
+    <string name="refresh_failed">Aggiornamento non riuscito – dati delle %1$s</string>
+
+    <!-- Departures -->
+    <string name="updated_at">Aggiornato alle %1$s</string>
+    <string name="no_departures">Nessuna partenza nelle prossime ore.</string>
+    <string name="load_more">Partenze successive</string>
+    <string name="filter_all">Tutti</string>
+    <string name="view_time">Per orario</string>
+    <string name="view_line">Per linea</string>
+    <string name="now">ora</string>
+    <string name="minutes_short">%1$d min</string>
+    <string name="cancelled">Soppresso</string>
+    <string name="platform_rail">Bin. %1$s</string>
+    <string name="platform_other">Fermata %1$s</string>
+    <plurals name="alerts_count">
+        <item quantity="one">%1$d avviso</item>
+        <item quantity="other">%1$d avvisi</item>
+    </plurals>
+
+    <!-- Trip -->
+    <string name="realtime_data">Dati in tempo reale</string>
+    <string name="schedule_only">Solo orario (nessun dato in tempo reale)</string>
+    <string name="trip_cancelled">Questa corsa è soppressa</string>
+    <string name="stop_cancelled">Fermata soppressa</string>
+    <string name="vehicle_between">In viaggio</string>
+    <string name="vehicle_at_stop">Ora a questa fermata</string>
+    <string name="vehicle_not_started">Non ancora partito</string>
+    <string name="vehicle_finished">Arrivato al capolinea</string>
+    <string name="trip_number">Corsa %1$s</string>
+    <string name="departures_from">Partenze da %1$s</string>
+    <string name="open_departures">Apri le partenze</string>
+
+    <!-- Search -->
+    <string name="search_empty">Nessuna fermata trovata.</string>
+    <string name="search_min_chars">Scrivi almeno due lettere.</string>
+
+    <!-- Distances -->
+    <string name="distance_m">%1$d m</string>
+    <string name="distance_km">%1$s km</string>
+
+    <!-- Modes; the _de names are used in Germany, mode_train for Dutch trains -->
+    <string name="mode_long_distance">Lunga percorrenza</string>
+    <string name="mode_regional">Regionale</string>
+    <string name="mode_train">Treno</string>
+    <string name="mode_suburban">Suburbano</string>
+    <string name="mode_suburban_de">S-Bahn</string>
+    <string name="mode_subway">Metro</string>
+    <string name="mode_subway_de">U-Bahn</string>
+    <string name="mode_tram">Tram</string>
+    <string name="mode_bus">Bus</string>
+    <string name="mode_coach">Pullman</string>
+    <string name="mode_ferry">Traghetto</string>
+    <string name="mode_cable">Funivia</string>
+    <string name="mode_on_demand">A chiamata</string>
+    <string name="mode_other">Altro</string>
+
+    <!-- Attribution / about -->
+    <string name="attribution">Dati: Transitous · © collaboratori di OpenStreetMap</string>
+    <string name="about_description">Partenze in tempo reale di bus, tram, metro e treni in Italia, Germania e Paesi Bassi (e non solo): fermate vicine, preferiti, ritardi e soppressioni a colpo d\'occhio.</string>
+    <string name="about_version">Versione %1$s</string>
+    <string name="about_data_title">Fonti dei dati</string>
+    <string name="about_data_text">Orari e dati in tempo reale sono forniti da Transitous, un servizio di trasporto pubblico gratuito gestito da volontari. Per l\'Italia Transitous usa gli orari di Trenitalia, Trenord e delle aziende regionali e cittadine (molti tramite BusOne), per la Germania quelli di DELFI, per i Paesi Bassi quelli di OpenOV. Fermate e mappe si basano su OpenStreetMap.</string>
+    <string name="about_link_sources">Fonti dei dati e licenze di Transitous</string>
+    <string name="about_link_osm">Copyright di OpenStreetMap</string>
+    <string name="about_link_donate">Sostieni Transitous con una donazione</string>
+    <string name="about_privacy_title">Privacy</string>
+    <string name="about_privacy_text">L\'app non ha account, pubblicità né tracciamento. Per trovare le fermate vicine, la zona intorno alla tua posizione viene inviata al server di Transitous. I preferiti sono salvati solo su questo dispositivo.</string>
+    <string name="about_source_title">Codice sorgente</string>
+    <string name="about_link_source">Codice sorgente su GitHub</string>
+    <string name="about_license">Software libero sotto la GNU General Public License, versione 3 o successiva.</string>
+    <string name="about_legend_title">Colori</string>
+    <string name="about_legend_ontime">Verde: in orario (dati in tempo reale)</string>
+    <string name="about_legend_delayed">Rosso: in ritardo, soppresso o cambio binario</string>
+    <string name="about_legend_schedule">Neutro: solo orario, nessun dato in tempo reale</string>
+</resources>

@@ -1,6 +1,7 @@
 package io.github.dnicotra.ovinfode.data
 
 import io.github.dnicotra.ovinfode.Fixtures
+import io.github.dnicotra.ovinfode.country.Italy
 import io.github.dnicotra.ovinfode.country.Netherlands
 import io.github.dnicotra.ovinfode.data.api.MatchDto
 import io.github.dnicotra.ovinfode.data.api.StopTimesResponse
@@ -190,6 +191,87 @@ class MappingTest {
         assertNull(extra.operator)
         assertEquals("Den Haag Laan v NOI", extra.stops.first().name)
         assertEquals("Venlo", extra.stops.last().name)
+    }
+
+    @Test
+    fun `roma termini board spells names the Italian way and shows each train once`() {
+        val result = Fixtures.romaTermini
+        assertEquals("Roma Termini", result.stop?.name)
+        val departures = result.departures
+        assertTrue(departures.all { it.stopName == "Roma Termini" && it.operator == "Trenitalia" })
+        val fr = departures.first { it.line.name == "FR 9490" }
+        assertEquals("Venezia S. Lucia", fr.headsign)
+        assertEquals(TransportMode.LONG_DISTANCE, fr.line.mode)
+        assertEquals(0xFFC8102E.toInt(), fr.line.color)
+        assertEquals("9490", fr.tripNumber)
+        // Regional trains by category, long-distance trains with their number.
+        assertEquals(setOf("RV", "REG"), departures.filter { it.line.mode == TransportMode.REGIONAL }.map { it.line.name }.toSet())
+        assertTrue(departures.filter { it.line.mode == TransportMode.LONG_DISTANCE }.all { it.line.name == "FR ${it.tripNumber}" })
+        assertTrue(departures.any { it.headsign == "Reggio di Calabria Centrale" })
+        assertTrue("headsign in capitals", departures.all { it.headsign.any(Char::isLowerCase) })
+        // Trenitalia has REG 4594 and RV 4594 (and FR 8303 twice) at the same time: only the current versions remain.
+        val numbers = departures.mapNotNull { it.tripNumber }
+        assertEquals("trains shown twice", numbers.size - 1, numbers.toSet().size) // REG 23365 splits into Boiano and Cassino
+        assertTrue(departures.single { it.tripNumber == "4594" }.tripId.contains("_0_v_62-4594-"))
+        assertEquals("RV", departures.single { it.tripNumber == "4594" }.line.name)
+        assertTrue(departures.single { it.tripNumber == "8303" }.tripId.contains("_0_v_"))
+        assertEquals(setOf("Boiano", "Cassino"), departures.filter { it.tripNumber == "23365" }.map { it.headsign }.toSet())
+    }
+
+    @Test
+    fun `milan board has metro lines and names in capitals`() {
+        val departures = Fixtures.milanoDuomo.departures
+        val metro = departures.filter { it.line.mode == TransportMode.SUBWAY }
+        assertTrue(metro.isNotEmpty())
+        assertTrue(metro.all { it.line.name == "M3" && it.line.color == Italy.MILAN_METRO_COLORS["M3"] })
+        assertEquals(setOf("San Donato", "Comasina"), metro.map { it.headsign }.toSet())
+        val trams = departures.filter { it.line.mode == TransportMode.TRAM }
+        assertTrue(trams.any { it.headsign == "Rozzano (Via G. Rossa)" })
+        assertTrue(trams.any { it.headsign == "P.le Negrelli" && it.stopName == "Duomo M1 M3" })
+        assertTrue(departures.all { it.tripNumber == null })
+    }
+
+    @Test
+    fun `trenord train numbers and turin stop codes`() {
+        val cadorna = Fixtures.stopTimes("stoptimes_milano_cadorna.json").departures
+        val s3 = cadorna.first { it.line.name == "S3" }
+        assertEquals("823", s3.tripNumber)
+        assertEquals("Saronno", s3.headsign)
+        assertTrue(cadorna.all { it.tripNumber!!.all(Char::isDigit) })
+
+        val turin = Fixtures.stopTimes("stoptimes_torino_porta_nuova.json")
+        assertEquals("Porta Nuova", turin.stop?.name)
+        assertTrue(turin.departures.any { it.isRealtime })
+        assertEquals(
+            setOf("Crocetta, Corso Stati Uniti", "Mirafiori Nord, Via Allason (Poste)", "Città Giardino, Via Grosso"),
+            turin.departures.map { it.headsign }.toSet(),
+        )
+    }
+
+    @Test
+    fun `rome alerts are cleaned up`() {
+        val alerts = Fixtures.stopTimes("stoptimes_roma_termini_bus.json").alerts
+        assertTrue(alerts.size >= 5)
+        for (alert in alerts) {
+            assertFalse(alert.description, "@romamobilita" in alert.description)
+            assertFalse(alert.description, '\r' in alert.description || alert.description.any { it.code in 0x80..0x9f })
+            assertFalse(alert.description, "&#039;" in alert.description)
+        }
+        assertTrue(alerts.any { "piazza dell'Esquilino" in it.description })
+        assertTrue(alerts.any { "Via dell’Arco di Travertino" in it.description })
+    }
+
+    @Test
+    fun `italian trip`() {
+        val trip = Fixtures.trip("trip_fr9490.json", "20261127_06:10_it-trenitalia_0083_680083_0_v_68-9490-5B67-0083_v_68-9490-5B67-0083")
+        assertEquals("FR 9490", trip.line.name)
+        assertEquals("9490", trip.tripNumber)
+        assertEquals("Trenitalia", trip.operator)
+        assertEquals("Venezia S. Lucia", trip.headsign)
+        assertEquals(
+            listOf("Salerno", "Napoli Centrale", "Roma Termini", "Firenze S. Maria Novella", "Bologna C.le/AV", "Rovigo", "Padova", "Venezia Mestre", "Venezia S. Lucia"),
+            trip.stops.map { it.name },
+        )
     }
 
     @Test
