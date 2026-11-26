@@ -58,7 +58,7 @@ class ScreenshotTest {
         }
 
     private val koelnStop = Stop(
-        "at-Railway-Current-Reference-Data-2027_de:05315:11201:7:72", "Köln Hauptbahnhof", 50.9430, 6.9589, "Köln",
+        "at-Railway-Current-Reference-Data-2027_de:05315:11201:7:72", "Köln Hbf", 50.9430, 6.9589, "Köln",
         sortedSetOf(TransportMode.LONG_DISTANCE, TransportMode.REGIONAL, TransportMode.SUBURBAN, TransportMode.TRAM, TransportMode.BUS),
     )
     private val koelnNow = Instant.parse("2026-11-26T06:08:40Z")
@@ -136,7 +136,7 @@ class ScreenshotTest {
     @Test
     fun departuresHeidelberg() {
         val fake = FakeTransitous(mapOf("/api/v6/stoptimes" to "stoptimes_heidelberg_hbf.json"))
-        val stop = Stop("at-Railway-Current-Reference-Data-2026_de:08221:1160:1:1", "Heidelberg, Hauptbahnhof", 49.4035, 8.6748)
+        val stop = Stop("at-Railway-Current-Reference-Data-2026_de:08221:1160:1:1", "Heidelberg Hbf", 49.4035, 8.6748)
         val board = runBlocking { TransitRepository(fake.api).departures(stop, 10) }
         val now = Instant.parse("2026-11-26T07:00:30Z")
         capture("departures_heidelberg") {
@@ -154,7 +154,7 @@ class ScreenshotTest {
             .sortedBy { it.second }
             .mapIndexed { index, (stop, distance) ->
                 val preview = when {
-                    stop.name == "Köln Hauptbahnhof" -> PreviewState.Loaded(departures.filter { it.line.mode.isRail })
+                    stop.name == "Köln Hbf" -> PreviewState.Loaded(departures.filter { it.line.mode.isRail })
                     stop.name == "Köln Dom/Hbf" -> PreviewState.Loaded(departures.filter { !it.line.mode.isRail })
                     index < 4 -> PreviewState.Loading
                     else -> null

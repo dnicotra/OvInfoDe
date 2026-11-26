@@ -42,18 +42,19 @@ class TransitRepositoryTest {
         val departures = repository.departures(heidelberg, count = 10).departures
         fun headsignOf(line: String) = departures.first { it.line.name == line }.headsign
 
-        // DELFI calls Stuttgart Hbf just "Hauptbahnhof".
-        assertEquals("Stuttgart, Hauptbahnhof", headsignOf("ICE 1697"))
-        assertEquals("Karlsruhe Hauptbahnhof", headsignOf("RE73"))
-        assertEquals("Frankfurt (Main) Hauptbahnhof", headsignOf("RB68"))
+        // DELFI calls Stuttgart Hbf just "Hauptbahnhof"; the app shows "Stuttgart Hbf".
+        assertEquals("Stuttgart Hbf", headsignOf("ICE 1697"))
+        assertEquals("Karlsruhe Hbf", headsignOf("RE73"))
+        assertEquals("Frankfurt (Main) Hbf", headsignOf("RB68"))
         assertEquals("Homburg (Saar) Hbf", departures.first { it.headsign.startsWith("Homburg") }.headsign)
-        assertEquals("Mannheim, Hauptbahnhof", headsignOf("RE10a"))
+        assertEquals("Mannheim Hbf", headsignOf("RE10a"))
         // Written by the operator, not the name of the last stop: untouched.
         assertEquals("Trier Hbf", headsignOf("RE1"))
 
-        // Homburg, Eppingen, Stuttgart, Karlsruhe (two platforms, one station), Frankfurt, Dresden.
+        // Only "Eppingen" and the bare "Hbf" of Stuttgart need a lookup; "Karlsruhe Hbf",
+        // "Mannheim Hbf" etc. already name their town.
         val lookups = fake.requestsTo("/api/v1/reverse-geocode").size
-        assertEquals(6, lookups)
+        assertEquals(2, lookups)
 
         repository.departures(heidelberg, count = 10)
         assertEquals("towns are cached", lookups, fake.requestsTo("/api/v1/reverse-geocode").size)
@@ -65,12 +66,12 @@ class TransitRepositoryTest {
 
         val trip = TransitRepository(fake.api).trip("20261126_07:03_de-DELFI_3490184955", contextStopId = "de-DELFI_de:08221:1160:5:8")
 
-        assertEquals("Stuttgart, Hauptbahnhof", trip.headsign)
-        assertEquals("Stuttgart, Hauptbahnhof", trip.stops.last().name)
-        assertEquals("Frankfurt (Main) Hauptbahnhof", trip.stops.first().name)
-        assertEquals("Heidelberg, Hauptbahnhof", trip.stops[2].name)
-        // Only the two names without a "Town," prefix are looked up.
-        assertEquals(2, fake.requestsTo("/api/v1/reverse-geocode").size)
+        assertEquals("Stuttgart Hbf", trip.headsign)
+        assertEquals("Stuttgart Hbf", trip.stops.last().name)
+        assertEquals("Frankfurt (Main) Hbf", trip.stops.first().name)
+        assertEquals("Heidelberg Hbf", trip.stops[2].name)
+        // Only the bare "Hbf" is looked up.
+        assertEquals(1, fake.requestsTo("/api/v1/reverse-geocode").size)
     }
 
     @Test
