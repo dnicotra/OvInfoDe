@@ -93,6 +93,7 @@
     <string name="about_privacy_text">The app has no account, no ads and no tracking. To find nearby stops, the area around your location is sent to the Transitous server. Favourites are stored only on this device.</string>
     <string name="about_source_title">Source code</string>
     <string name="about_link_source">Source code on GitHub</string>
+    <string name="about_license">Free software under the GNU General Public License, version 3 or later.</string>
     <string name="about_legend_title">Colours</string>
     <string name="about_legend_ontime">Green: on time (real-time data)</string>
     <string name="about_legend_delayed">Red: delayed, cancelled or platform changed</string>

@@ -93,6 +93,7 @@
     <string name="about_privacy_text">Die App hat kein Konto, keine Werbung und kein Tracking. Um Haltestellen in der Nähe zu finden, wird der Bereich um deinen Standort an den Transitous-Server gesendet. Favoriten werden nur auf diesem Gerät gespeichert.</string>
     <string name="about_source_title">Quellcode</string>
     <string name="about_link_source">Quellcode auf GitHub</string>
+    <string name="about_license">Freie Software unter der GNU General Public License, Version 3 oder später.</string>
     <string name="about_legend_title">Farben</string>
     <string name="about_legend_ontime">Grün: pünktlich (Echtzeitdaten)</string>
     <string name="about_legend_delayed">Rot: verspätet, Ausfall oder Gleiswechsel</string>

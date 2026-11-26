@@ -69,6 +69,7 @@ fun AboutScreen(onBack: () -> Unit) {
 
             Section(stringResource(R.string.about_source_title))
             Link(stringResource(R.string.about_link_source), BuildConfig.PROJECT_URL)
+            Link(stringResource(R.string.about_license), "${BuildConfig.PROJECT_URL}/blob/main/LICENSE")
         }
     }
 }
