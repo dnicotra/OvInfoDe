@@ -72,8 +72,11 @@
     <!-- Modes -->
     <string name="mode_long_distance">Fernverkehr</string>
     <string name="mode_regional">Regionalverkehr</string>
+    <string name="mode_train">Zug</string>
     <string name="mode_suburban">S-Bahn</string>
-    <string name="mode_subway">U-Bahn</string>
+    <string name="mode_suburban_de">S-Bahn</string>
+    <string name="mode_subway">Metro</string>
+    <string name="mode_subway_de">U-Bahn</string>
     <string name="mode_tram">Tram</string>
     <string name="mode_bus">Bus</string>
     <string name="mode_coach">Fernbus</string>
@@ -84,10 +87,10 @@
 
     <!-- Attribution / about -->
     <string name="attribution">Daten: Transitous · © OpenStreetMap-Mitwirkende</string>
-    <string name="about_description">Live-Abfahrten für Bus, Tram, U-Bahn, S-Bahn und Zug in Deutschland (und darüber hinaus): Haltestellen in der Nähe, Favoriten, Verspätungen und Ausfälle auf einen Blick.</string>
+    <string name="about_description">Live-Abfahrten für Bus, Tram, U-Bahn, S-Bahn und Zug in Deutschland und den Niederlanden (und darüber hinaus): Haltestellen in der Nähe, Favoriten, Verspätungen und Ausfälle auf einen Blick.</string>
     <string name="about_version">Version %1$s</string>
     <string name="about_data_title">Datenquellen</string>
-    <string name="about_data_text">Fahrplan- und Echtzeitdaten stammen von Transitous, einem freien, ehrenamtlich betriebenen ÖPNV-Dienst. Für Deutschland nutzt Transitous die bundesweiten DELFI-Soll- und Echtzeitdaten. Haltestellen und Karten basieren auf OpenStreetMap.</string>
+    <string name="about_data_text">Fahrplan- und Echtzeitdaten stammen von Transitous, einem freien, ehrenamtlich betriebenen ÖPNV-Dienst. Für Deutschland nutzt Transitous die bundesweiten DELFI-Soll- und Echtzeitdaten, für die Niederlande die von OpenOV. Haltestellen und Karten basieren auf OpenStreetMap.</string>
     <string name="about_link_sources">Datenquellen und Lizenzen von Transitous</string>
     <string name="about_link_osm">OpenStreetMap-Urheberrecht</string>
     <string name="about_link_donate">Transitous mit einer Spende unterstützen</string>

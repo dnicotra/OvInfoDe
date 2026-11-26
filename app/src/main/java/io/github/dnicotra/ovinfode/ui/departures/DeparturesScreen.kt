@@ -48,6 +48,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.dnicotra.ovinfode.R
+import io.github.dnicotra.ovinfode.country.Country
+import io.github.dnicotra.ovinfode.country.country
 import io.github.dnicotra.ovinfode.data.DepartureViewMode
 import io.github.dnicotra.ovinfode.data.model.Departure
 import io.github.dnicotra.ovinfode.data.model.Stop
@@ -181,7 +183,8 @@ private fun DepartureList(
             Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
                 ViewModeToggle(viewMode, onViewMode)
                 if (state.availableModes.size > 1) {
-                    ModeFilterRow(state.availableModes, state.filter, onFilter, Modifier.padding(top = 8.dp))
+                    val country = remember(state.stop.id) { state.stop.country() }
+                    ModeFilterRow(state.availableModes, country, state.filter, onFilter, Modifier.padding(top = 8.dp))
                 }
             }
         }
@@ -235,6 +238,7 @@ private fun ViewModeToggle(viewMode: DepartureViewMode, onViewMode: (DepartureVi
 @Composable
 private fun ModeFilterRow(
     modes: List<TransportMode>,
+    country: Country,
     selected: TransportMode?,
     onFilter: (TransportMode?) -> Unit,
     modifier: Modifier = Modifier,
@@ -248,7 +252,7 @@ private fun ModeFilterRow(
             FilterChip(
                 selected = selected == mode,
                 onClick = { onFilter(if (selected == mode) null else mode) },
-                label = { Text(stringResource(mode.labelRes())) },
+                label = { Text(stringResource(mode.labelRes(country))) },
                 leadingIcon = { Icon(mode.icon(), contentDescription = null, modifier = Modifier.size(FilterChipDefaults.IconSize)) },
             )
         }

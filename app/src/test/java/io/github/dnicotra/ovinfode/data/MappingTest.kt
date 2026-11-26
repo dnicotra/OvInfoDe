@@ -1,7 +1,9 @@
 package io.github.dnicotra.ovinfode.data
 
 import io.github.dnicotra.ovinfode.Fixtures
+import io.github.dnicotra.ovinfode.country.Netherlands
 import io.github.dnicotra.ovinfode.data.api.MatchDto
+import io.github.dnicotra.ovinfode.data.api.StopTimesResponse
 import io.github.dnicotra.ovinfode.data.api.TransitousApi
 import io.github.dnicotra.ovinfode.data.model.TransportMode
 import org.junit.Assert.assertEquals
@@ -93,6 +95,108 @@ class MappingTest {
         assertEquals("Berlin", alex.area)
         assertTrue(alex.modes.containsAll(listOf(TransportMode.SUBURBAN, TransportMode.SUBWAY)))
         assertEquals("Krefeld", stops.single { it.name == "Krefeld Alexanderplatz" }.area)
+    }
+
+    @Test
+    fun `amsterdam board names trains the Dutch way`() {
+        val result = Fixtures.amsterdam
+        assertEquals("Amsterdam Centraal", result.stop?.name)
+        val departures = result.departures
+        assertEquals(34, departures.size)
+        assertTrue("no unnamed lines", departures.none { it.line.name == "?" })
+
+        val bus = departures[0]
+        assertEquals("42", bus.line.name)
+        assertEquals(TransportMode.BUS, bus.line.mode)
+        assertEquals("Cruquius-eiland", bus.headsign)
+        assertEquals("Amsterdam, Centraal Station", bus.stopName)
+        assertEquals("C", bus.platform)
+        assertEquals("GVB", bus.operator)
+        assertNull("no colour in the feed, none added for buses", bus.line.color)
+
+        val sprinter = departures[1]
+        assertEquals("SPR", sprinter.line.name)
+        assertEquals(TransportMode.REGIONAL, sprinter.line.mode)
+        assertEquals(Netherlands.TRAIN_COLOR, sprinter.line.color)
+        assertEquals(Netherlands.TRAIN_TEXT_COLOR, sprinter.line.textColor)
+        assertEquals("Uitgeest", sprinter.headsign)
+        assertEquals("Amsterdam Centraal", sprinter.stopName)
+        assertEquals("5a", sprinter.platform)
+        assertEquals("4026", sprinter.tripNumber)
+        assertTrue(sprinter.isRealtime)
+
+        assertEquals("IC", departures[4].line.name)
+        assertEquals("4b", departures[4].platform)
+        assertEquals(6L, departures.first { it.tripNumber == "3928" }.delayMinutes)
+        // Metro lines bring their own colours.
+        assertEquals(0xFFD81118.toInt(), departures[3].line.color)
+        assertEquals(TransportMode.SUBWAY, departures[3].line.mode)
+
+        // A train added in real time, without a route in the feed.
+        val extra = departures.single { it.tripId.contains(":IFF:") }
+        assertEquals("IC", extra.line.name)
+        assertEquals(TransportMode.REGIONAL, extra.line.mode)
+        assertEquals("Nijmegen", extra.headsign)
+        assertNull(extra.tripNumber)
+        assertNull(extra.operator)
+    }
+
+    @Test
+    fun `utrecht board has no placeholder names`() {
+        val departures = Fixtures.utrecht.departures
+        assertTrue(departures.none { it.line.name == "?" || it.tripNumber == "?" })
+        assertEquals(2, departures.count { it.tripId.contains(":IFF:IC:") && it.line.name == "IC" })
+        // IC 3533 to Venlo was cancelled and replaced by an added train at the same time: only that one is shown.
+        val venlo = departures.filter { it.headsign == "Venlo" && it.scheduled == Instant.parse("2026-11-26T09:24:00Z") }
+        assertEquals(1, venlo.size)
+        assertFalse(venlo.single().cancelled)
+        assertTrue(venlo.single().tripId.endsWith(":IFF:IC:303533"))
+        assertEquals(setOf("IC", "SPR", "S85"), departures.map { it.line.name }.toSet())
+        assertEquals("'s-Hertogenbosch", departures.first { it.tripNumber == "8833" }.headsign)
+    }
+
+    @Test
+    fun `bilingual alerts are shown in one language`() {
+        fun alerts(language: String) =
+            TransitousApi.json.decodeFromString<StopTimesResponse>(Fixtures.text("stoptimes_amsterdam_leidseplein.json"))
+                .toStopDepartures(language).alerts
+        val english = alerts("en")
+        assertTrue(english.isNotEmpty())
+        assertTrue(english.all { " -- " !in it.header })
+        // The header is cut off after 140 characters, in the middle of the English part; the description is complete.
+        val tram5 = english.single { it.header.startsWith("Stop not served by tram 5.") }
+        assertEquals("Stop not served by tram 5. Cause: Damage to the overhead power line. Details: gvb.nl", tram5.header)
+        assertEquals(tram5.header, tram5.description)
+        assertTrue(alerts("nl").any { it.header == "Tram 5 stopt hier niet. Oorzaak: Schade aan de bovenleiding. Details: gvb.nl" })
+    }
+
+    @Test
+    fun `dutch trips`() {
+        val ic = Fixtures.trip("trip_ic2735.json", "20261126_09:27_nl-OpenOV_395288670")
+        assertEquals("IC", ic.line.name)
+        assertEquals(Netherlands.TRAIN_COLOR, ic.line.color)
+        assertEquals("2735", ic.tripNumber)
+        assertEquals("Maastricht", ic.headsign)
+        assertEquals(13, ic.stops.size)
+        assertEquals("Alkmaar", ic.stops.first().name)
+        assertEquals("Utrecht Centraal", ic.stops[6].name)
+        assertEquals("18", ic.stops[6].platform)
+        assertEquals("'s-Hertogenbosch", ic.stops[7].name)
+
+        val extra = Fixtures.trip("trip_iff_ic3531.json", "20261126_09:12_nl-OpenOV_2026-11-26:IFF:IC:303531")
+        assertEquals("IC", extra.line.name)
+        assertEquals(TransportMode.REGIONAL, extra.line.mode)
+        assertNull(extra.tripNumber)
+        assertNull(extra.operator)
+        assertEquals("Den Haag Laan v NOI", extra.stops.first().name)
+        assertEquals("Venlo", extra.stops.last().name)
+    }
+
+    @Test
+    fun `german lines keep their names and colours`() {
+        val ic = Fixtures.koeln.departures.first { it.line.name == "IC 2443" }
+        assertNull(ic.line.color)
+        assertEquals("S3", Fixtures.berlin.departures[0].line.name)
     }
 
     @Test

@@ -1,8 +1,11 @@
 package io.github.dnicotra.ovinfode.util
 
 /*
- * Standard German abbreviations for stop names, as used by DB and on departure displays:
- * "Köln Hauptbahnhof" → "Köln Hbf", "Hermannstraße" → "Hermannstr.".
+ * Name rules for stops of every country (country-specific ones live in Country.localStopName).
+ *
+ * Mostly the standard German abbreviations, as used by DB and on departure displays:
+ * "Köln Hauptbahnhof" → "Köln Hbf", "Hermannstraße" → "Hermannstr.". They only match German
+ * words, so they also help in Austria or Switzerland and never touch Dutch names.
  * Words are only replaced as a whole (or as the end of a compound for "-straße"), so
  * "Bahnhofstraße" becomes "Bahnhofstr.", never "Bfstr.".
  */
@@ -13,6 +16,8 @@ private const val NOT_BEFORE_LETTER = """(?!\p{L})"""
 private fun word(w: String) = Regex(NOT_AFTER_LETTER_OR_HYPHEN + w + NOT_BEFORE_LETTER)
 
 private val rules: List<Pair<Regex, String>> = listOf(
+    // "Rotterdam, Rotterdam Centraal" → "Rotterdam Centraal": the town is already in the name.
+    Regex("""^([^,]+), (?=\1(?:$|[ /(\-]))""") to "",
     word("Zentraler (?:Omnibus|Bus)bahnhof") to "ZOB",
     word("Hauptbahnhof") to "Hbf",
     word("Fernbahnhof") to "Fernbf",

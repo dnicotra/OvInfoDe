@@ -57,12 +57,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.dnicotra.ovinfode.R
+import io.github.dnicotra.ovinfode.country.Country
+import io.github.dnicotra.ovinfode.country.OtherCountry
 import io.github.dnicotra.ovinfode.data.model.Alert
 import io.github.dnicotra.ovinfode.data.model.ErrorKind
 import io.github.dnicotra.ovinfode.data.model.Line
 import io.github.dnicotra.ovinfode.data.model.TransportMode
 
-/** Default line colours, loosely following German signage conventions. */
+/**
+ * Colours for lines whose feed has none, loosely following German signage conventions.
+ * Countries can set their own in [Country.line] (Dutch trains are NS yellow).
+ */
 private fun defaultLineColor(mode: TransportMode): Color = when (mode) {
     TransportMode.LONG_DISTANCE -> Color(0xFFEC0016)
     TransportMode.REGIONAL -> Color(0xFF646973)
@@ -121,8 +126,9 @@ fun TransportMode.icon(): ImageVector = when (this) {
     TransportMode.CABLE, TransportMode.OTHER -> Icons.Filled.Commute
 }
 
+/** Name of the mode as used in [country] ("U-Bahn" in Germany, "Metro" elsewhere). */
 @StringRes
-fun TransportMode.labelRes(): Int = when (this) {
+fun TransportMode.labelRes(country: Country = OtherCountry): Int = country.modeLabel(this) ?: when (this) {
     TransportMode.LONG_DISTANCE -> R.string.mode_long_distance
     TransportMode.REGIONAL -> R.string.mode_regional
     TransportMode.SUBURBAN -> R.string.mode_suburban
@@ -136,12 +142,12 @@ fun TransportMode.labelRes(): Int = when (this) {
     TransportMode.OTHER -> R.string.mode_other
 }
 
-/** Small row of mode icons, e.g. for search results and nearby stops. */
+/** Small row of mode icons, e.g. for search results and nearby stops; [country] names them for accessibility. */
 @Composable
-fun ModeIcons(modes: Collection<TransportMode>, modifier: Modifier = Modifier) {
+fun ModeIcons(modes: Collection<TransportMode>, country: Country, modifier: Modifier = Modifier) {
     // Long-distance and regional share the train icon.
     val icons = modes.sorted().map { it.icon() }.distinct()
-    val label = modes.sorted().map { stringResource(it.labelRes()) }.joinToString()
+    val label = modes.sorted().map { stringResource(it.labelRes(country)) }.distinct().joinToString()
     Row(
         modifier = modifier.semantics { contentDescription = label },
         horizontalArrangement = Arrangement.spacedBy(2.dp),

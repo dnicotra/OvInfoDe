@@ -3,6 +3,7 @@ package io.github.dnicotra.ovinfode.util
 import io.github.dnicotra.ovinfode.Fixtures
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class StopNamesTest {
@@ -42,6 +43,15 @@ class StopNamesTest {
     }
 
     @Test
+    fun `a town that the name repeats is dropped`() {
+        assertEquals("Rotterdam Centraal", shortStopName("Rotterdam, Rotterdam Centraal"))
+        assertEquals("Schiphol Airport/Plaza", shortStopName("Schiphol, Schiphol Airport/Plaza"))
+        assertEquals("Halle (Saale) Hbf", shortStopName("Halle, Halle (Saale) Hauptbahnhof"))
+        assertEquals("Berlin, Berliner Str.", shortStopName("Berlin, Berliner Straße"))
+        assertEquals("Amsterdam, Centraal Station", shortStopName("Amsterdam, Centraal Station"))
+    }
+
+    @Test
     fun `whole words only`() {
         assertEquals("Bahnhofsplatz", shortStopName("Bahnhofsplatz"))
         assertEquals("Hauptbahnhofstr.", shortStopName("Hauptbahnhofstraße"))
@@ -53,11 +63,10 @@ class StopNamesTest {
 
     @Test
     fun `every recorded stop name is shortened safely`() {
-        val names = listOf(
-            "stoptimes_berlin_alexanderplatz.json", "stoptimes_koeln_hbf.json", "stoptimes_heidelberg_hbf.json",
-            "trip_s3.json", "trip_ice1697.json", "geocode_alexanderplatz.json", "mapstops_koeln.json",
-        ).flatMap { file -> Regex(""""(?:name|headsign)": "([^"]+)"""").findAll(Fixtures.text(file)).map { it.groupValues[1] } }
+        val names = Fixtures.all
+            .flatMap { file -> Regex(""""(?:name|headsign)"\s*:\s*"([^"]+)"""").findAll(Fixtures.text(file)).map { it.groupValues[1] } }
             .toSortedSet()
+        assertTrue("names found", names.size > 150)
         val glued = Regex("""\p{L}(?:Hbf|Bf)|(?:Hbf|Bf)\p{L}""")
         for (name in names) {
             val short = shortStopName(name)

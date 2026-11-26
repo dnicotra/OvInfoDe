@@ -11,7 +11,7 @@ data class NamedPlace(val id: String?, val name: String, val lat: Double, val lo
     fun toStopOrNull(): Stop? = id?.let { Stop(it, name, lat, lon) }
 }
 
-/** Transport modes as shown to the user (MOTIS modes folded into familiar German categories). */
+/** Transport modes as shown to the user (MOTIS modes folded into familiar categories; see Country.modeLabel for their names). */
 enum class TransportMode {
     LONG_DISTANCE, REGIONAL, SUBURBAN, SUBWAY, TRAM, BUS, COACH, FERRY, CABLE, ON_DEMAND, OTHER;
 

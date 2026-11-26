@@ -4,9 +4,9 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import io.github.dnicotra.ovinfode.country.Countries
 import io.github.dnicotra.ovinfode.data.model.Stop
 import io.github.dnicotra.ovinfode.data.model.TransportMode
-import io.github.dnicotra.ovinfode.util.shortStopName
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -57,8 +57,8 @@ class UserPrefs(private val store: DataStore<Preferences>) {
         return runCatching { json.decodeFromString<List<StoredStop>>(raw) }.getOrDefault(emptyList()).map {
             Stop(
                 id = it.id,
-                // Favourites saved by older versions get the current short names too.
-                name = shortStopName(it.name),
+                // Favourites saved by older versions get the current names too.
+                name = Countries.of(it.id, it.lat, it.lon).stopName(it.name),
                 lat = it.lat,
                 lon = it.lon,
                 area = it.area,

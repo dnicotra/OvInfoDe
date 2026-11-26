@@ -49,6 +49,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -62,6 +63,7 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.dnicotra.ovinfode.R
+import io.github.dnicotra.ovinfode.country.country
 import io.github.dnicotra.ovinfode.data.model.Stop
 import io.github.dnicotra.ovinfode.ui.components.AttributionFooter
 import io.github.dnicotra.ovinfode.ui.components.CenteredMessage
@@ -300,7 +302,7 @@ private fun StopCard(
             Column(Modifier.weight(1f)) {
                 Text(preview.stop.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    ModeIcons(preview.stop.modes)
+                    ModeIcons(preview.stop.modes, remember(preview.stop.id) { preview.stop.country() })
                     val subtitle = listOfNotNull(
                         preview.distanceMeters?.let { distanceText(it) },
                         preview.stop.area?.takeIf { !preview.stop.name.contains(it) },
