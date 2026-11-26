@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Abfahrten</string>
+
+    <!-- Navigation / actions -->
+    <string name="back">Back</string>
+    <string name="about">About</string>
+    <string name="refresh">Refresh</string>
+    <string name="retry">Try again</string>
+    <string name="favorite_add">Add to favourites</string>
+    <string name="favorite_remove">Remove from favourites</string>
+
+    <!-- Home -->
+    <string name="search_hint">Search stop or station</string>
+    <string name="tab_nearby">Nearby</string>
+    <string name="tab_favorites">Favourites</string>
+    <string name="location_permission_title">Departures near you</string>
+    <string name="location_permission_text">Allow location access to see the departures from the nearest stops. Your location is only used to look up stops around you.</string>
+    <string name="location_permission_button">Allow location</string>
+    <string name="locating">Finding your location…</string>
+    <string name="location_unavailable">Your location could not be determined. Is location turned on?</string>
+    <string name="approximate_location">Only your approximate location is shared, so nearby stops may be inaccurate.</string>
+    <string name="no_nearby_stops">No stops found nearby.</string>
+    <string name="favorites_empty">No favourites yet. Tap the star on a departure board to keep a stop here.</string>
+    <string name="no_upcoming_departures">No departures soon</string>
+
+    <!-- Errors -->
+    <string name="error_network">No connection. Please check your internet connection.</string>
+    <string name="error_server">The timetable service is not responding right now.</string>
+    <string name="error_not_found">Not found.</string>
+    <string name="error_unknown">Something went wrong.</string>
+    <string name="refresh_failed">Update failed – showing data from %1$s</string>
+
+    <!-- Departures -->
+    <string name="updated_at">Updated %1$s</string>
+    <string name="no_departures">No departures in the next hours.</string>
+    <string name="load_more">Later departures</string>
+    <string name="filter_all">All</string>
+    <string name="view_time">By time</string>
+    <string name="view_line">By line</string>
+    <string name="now">now</string>
+    <string name="minutes_short">%1$d min</string>
+    <string name="cancelled">Cancelled</string>
+    <string name="platform_rail">Pl. %1$s</string>
+    <string name="platform_other">Stop %1$s</string>
+    <plurals name="alerts_count">
+        <item quantity="one">%1$d notice</item>
+        <item quantity="other">%1$d notices</item>
+    </plurals>
+
+    <!-- Trip -->
+    <string name="realtime_data">Real-time data</string>
+    <string name="schedule_only">Timetable only (no real-time data)</string>
+    <string name="trip_cancelled">This trip is cancelled</string>
+    <string name="stop_cancelled">Stop cancelled</string>
+    <string name="vehicle_between">On the way</string>
+    <string name="vehicle_at_stop">At this stop now</string>
+    <string name="vehicle_not_started">Not departed yet</string>
+    <string name="vehicle_finished">Arrived at the final stop</string>
+    <string name="trip_number">Trip %1$s</string>
+
+    <!-- Search -->
+    <string name="search_empty">No stops found.</string>
+    <string name="search_min_chars">Type at least two letters.</string>
+
+    <!-- Distances -->
+    <string name="distance_m">%1$d m</string>
+    <string name="distance_km">%1$s km</string>
+
+    <!-- Modes -->
+    <string name="mode_long_distance">Long-distance</string>
+    <string name="mode_regional">Regional</string>
+    <string name="mode_suburban">S-Bahn</string>
+    <string name="mode_subway">U-Bahn</string>
+    <string name="mode_tram">Tram</string>
+    <string name="mode_bus">Bus</string>
+    <string name="mode_coach">Coach</string>
+    <string name="mode_ferry">Ferry</string>
+    <string name="mode_cable">Cable car</string>
+    <string name="mode_on_demand">On demand</string>
+    <string name="mode_other">Other</string>
+
+    <!-- Attribution / about -->
+    <string name="attribution">Data: Transitous · © OpenStreetMap contributors</string>
+    <string name="about_description">Live departures for buses, trams, U-Bahn, S-Bahn and trains in Germany (and beyond): nearby stops, favourites, delays and cancellations at a glance.</string>
+    <string name="about_version">Version %1$s</string>
+    <string name="about_data_title">Data sources</string>
+    <string name="about_data_text">Timetables and real-time data are provided by Transitous, a free, community-run public transport service. For Germany it uses the nationwide DELFI timetables and real-time feeds. Stops and maps are based on OpenStreetMap.</string>
+    <string name="about_link_sources">Transitous data sources and licences</string>
+    <string name="about_link_osm">OpenStreetMap copyright</string>
+    <string name="about_link_donate">Support Transitous with a donation</string>
+    <string name="about_privacy_title">Privacy</string>
+    <string name="about_privacy_text">The app has no account, no ads and no tracking. To find nearby stops, the area around your location is sent to the Transitous server. Favourites are stored only on this device.</string>
+    <string name="about_source_title">Source code</string>
+    <string name="about_link_source">Source code on GitHub</string>
+    <string name="about_legend_title">Colours</string>
+    <string name="about_legend_ontime">Green: on time (real-time data)</string>
+    <string name="about_legend_delayed">Red: delayed, cancelled or platform changed</string>
+    <string name="about_legend_schedule">Neutral: timetable only, no real-time data</string>
+</resources>

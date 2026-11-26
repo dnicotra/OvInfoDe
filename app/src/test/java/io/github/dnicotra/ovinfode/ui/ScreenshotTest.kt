@@ -1,0 +1,162 @@
+package io.github.dnicotra.ovinfode.ui
+
+import androidx.compose.runtime.Composable
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.github.takahirom.roborazzi.captureRoboImage
+import io.github.dnicotra.ovinfode.Fixtures
+import io.github.dnicotra.ovinfode.data.DepartureViewMode
+import io.github.dnicotra.ovinfode.data.api.MatchDto
+import io.github.dnicotra.ovinfode.data.api.PlaceDto
+import io.github.dnicotra.ovinfode.data.api.TransitousApi
+import io.github.dnicotra.ovinfode.data.model.Alert
+import io.github.dnicotra.ovinfode.data.model.LatLon
+import io.github.dnicotra.ovinfode.data.model.Stop
+import io.github.dnicotra.ovinfode.data.model.TransportMode
+import io.github.dnicotra.ovinfode.data.toStop
+import io.github.dnicotra.ovinfode.ui.departures.DeparturesContent
+import io.github.dnicotra.ovinfode.ui.departures.DeparturesUiState
+import io.github.dnicotra.ovinfode.ui.home.HomeContent
+import io.github.dnicotra.ovinfode.ui.home.HomeTab
+import io.github.dnicotra.ovinfode.ui.home.HomeUiState
+import io.github.dnicotra.ovinfode.ui.home.NearbyState
+import io.github.dnicotra.ovinfode.ui.home.PreviewState
+import io.github.dnicotra.ovinfode.ui.home.StopPreview
+import io.github.dnicotra.ovinfode.ui.search.SearchContent
+import io.github.dnicotra.ovinfode.ui.search.SearchResult
+import io.github.dnicotra.ovinfode.ui.search.SearchUiState
+import io.github.dnicotra.ovinfode.ui.theme.AppTheme
+import io.github.dnicotra.ovinfode.ui.trip.TripContent
+import io.github.dnicotra.ovinfode.ui.trip.TripUiState
+import io.github.dnicotra.ovinfode.util.distanceMeters
+import io.github.dnicotra.ovinfode.util.indexOfStop
+import org.junit.Before
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
+import java.time.Instant
+import java.util.TimeZone
+
+/**
+ * Renders the screens with recorded API data. Record with `./gradlew recordRoborazziDebug`;
+ * the images land in docs/screenshots/.
+ */
+@RunWith(AndroidJUnit4::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+@Config(sdk = [35], qualifiers = "de-rDE-w400dp-h860dp-xxhdpi")
+class ScreenshotTest {
+
+    @Before
+    fun berlinTime() = TimeZone.setDefault(TimeZone.getTimeZone("Europe/Berlin"))
+
+    private fun capture(name: String, dark: Boolean = false, content: @Composable () -> Unit) =
+        captureRoboImage("../docs/screenshots/$name.png") {
+            AppTheme(darkTheme = dark, dynamicColor = false) { content() }
+        }
+
+    private val koelnStop = Stop(
+        "at-Railway-Current-Reference-Data-2027_de:05315:11201:7:72", "Köln Hauptbahnhof", 50.9430, 6.9589, "Köln",
+        sortedSetOf(TransportMode.LONG_DISTANCE, TransportMode.REGIONAL, TransportMode.SUBURBAN, TransportMode.TRAM, TransportMode.BUS),
+    )
+    private val koelnNow = Instant.parse("2026-11-26T06:08:40Z")
+
+    private fun koelnBoard(filter: TransportMode? = null, alerts: List<Alert> = emptyList()) = Fixtures.koeln.let {
+        DeparturesUiState(
+            stop = koelnStop,
+            loading = false,
+            departures = it.departures,
+            alerts = alerts,
+            nextPageCursor = it.nextPageCursor,
+            filter = filter,
+            lastUpdated = koelnNow,
+        )
+    }
+
+    @Composable
+    private fun Board(state: DeparturesUiState, mode: DepartureViewMode, now: Instant, favorite: Boolean = true) =
+        DeparturesContent(state, favorite, mode, now, {}, {}, {}, {}, {}, {}, {})
+
+    @Test
+    fun departuresByTime() = capture("departures") { Board(koelnBoard(), DepartureViewMode.BY_TIME, koelnNow) }
+
+    @Test
+    fun departuresDark() = capture("departures_dark", dark = true) { Board(koelnBoard(), DepartureViewMode.BY_TIME, koelnNow) }
+
+    @Test
+    fun departuresFilteredWithAlert() = capture("departures_filtered_alert") {
+        Board(
+            koelnBoard(
+                filter = TransportMode.SUBURBAN,
+                alerts = listOf(Alert("Beispielmeldung: Bauarbeiten", "So sieht eine Störungsmeldung aus (Testdaten).")),
+            ),
+            DepartureViewMode.BY_TIME,
+            koelnNow,
+        )
+    }
+
+    @Test
+    fun departuresByLine() {
+        val berlin = Fixtures.berlin
+        val stop = Stop(
+            "de-DELFI_de:11000:900100003", "S+U Alexanderplatz Bhf (Berlin)", 52.52151, 13.411267, "Berlin",
+            sortedSetOf(TransportMode.REGIONAL, TransportMode.SUBURBAN, TransportMode.SUBWAY, TransportMode.BUS),
+        )
+        val now = Instant.parse("2026-11-26T06:04:10Z")
+        capture("departures_by_line") {
+            Board(DeparturesUiState(stop, loading = false, departures = berlin.departures, lastUpdated = now), DepartureViewMode.BY_LINE, now, favorite = false)
+        }
+    }
+
+    @Test
+    fun trip() {
+        val trip = Fixtures.tripS3
+        val state = TripUiState(
+            loading = false,
+            trip = trip,
+            highlightIndex = indexOfStop(trip.stops, "de-VBB_de:11000:900100003:2:53", null),
+            lastUpdated = Instant.parse("2026-11-26T06:05:30Z"),
+        )
+        capture("trip") { TripContent(state, Instant.parse("2026-11-26T06:05:30Z"), {}, {}) }
+    }
+
+    @Test
+    fun homeNearby() {
+        val here = LatLon(50.9420, 6.9580)
+        val places = TransitousApi.json.decodeFromString<List<PlaceDto>>(Fixtures.text("mapstops_koeln.json"))
+        val departures = Fixtures.koeln.departures
+        val stops = places.map { it.toStop() }
+            .map { stop -> stop to distanceMeters(here, stop.location).toInt() }
+            .sortedBy { it.second }
+            .mapIndexed { index, (stop, distance) ->
+                val preview = when {
+                    stop.name == "Köln Hauptbahnhof" -> PreviewState.Loaded(departures.filter { it.line.mode.isRail })
+                    stop.name == "Köln Dom/Hbf" -> PreviewState.Loaded(departures.filter { !it.line.mode.isRail })
+                    index < 4 -> PreviewState.Loading
+                    else -> null
+                }
+                StopPreview(stop, distance, preview)
+            }
+        val state = HomeUiState(
+            tab = HomeTab.NEARBY,
+            nearby = NearbyState.Loaded(stops, approximateLocation = false),
+            favoriteIds = setOf(koelnStop.id, stops.first().stop.id),
+        )
+        capture("home_nearby") { HomeContent(state, koelnNow, {}, {}, {}, {}, {}, {}, {}) }
+    }
+
+    @Test
+    fun homeNoPermission() = capture("home_no_permission") {
+        HomeContent(HomeUiState(tab = HomeTab.NEARBY, nearby = NearbyState.NoPermission), koelnNow, {}, {}, {}, {}, {}, {}, {})
+    }
+
+    @Test
+    fun search() {
+        val berlin = LatLon(52.52, 13.405)
+        val results = TransitousApi.json.decodeFromString<List<MatchDto>>(Fixtures.text("geocode_alexanderplatz.json"))
+            .map { it.toStop() }
+            .map { SearchResult(it, distanceMeters(berlin, it.location).toInt()) }
+        capture("search") {
+            SearchContent(SearchUiState(query = "Alexanderplatz", results = results, searched = true), {}, {}, {}, {}, autoFocus = false)
+        }
+    }
+}

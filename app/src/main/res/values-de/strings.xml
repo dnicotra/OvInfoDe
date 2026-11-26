@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Abfahrten</string>
+
+    <!-- Navigation / actions -->
+    <string name="back">Zurück</string>
+    <string name="about">Info</string>
+    <string name="refresh">Aktualisieren</string>
+    <string name="retry">Erneut versuchen</string>
+    <string name="favorite_add">Zu Favoriten hinzufügen</string>
+    <string name="favorite_remove">Aus Favoriten entfernen</string>
+
+    <!-- Home -->
+    <string name="search_hint">Haltestelle oder Bahnhof suchen</string>
+    <string name="tab_nearby">In der Nähe</string>
+    <string name="tab_favorites">Favoriten</string>
+    <string name="location_permission_title">Abfahrten in deiner Nähe</string>
+    <string name="location_permission_text">Erlaube den Standortzugriff, um die Abfahrten der nächsten Haltestellen zu sehen. Der Standort wird nur verwendet, um Haltestellen in deiner Umgebung zu finden.</string>
+    <string name="location_permission_button">Standort freigeben</string>
+    <string name="locating">Standort wird ermittelt …</string>
+    <string name="location_unavailable">Der Standort konnte nicht ermittelt werden. Ist die Standortermittlung eingeschaltet?</string>
+    <string name="approximate_location">Nur der ungefähre Standort ist freigegeben – die Haltestellen in der Nähe können ungenau sein.</string>
+    <string name="no_nearby_stops">Keine Haltestellen in der Nähe gefunden.</string>
+    <string name="favorites_empty">Noch keine Favoriten. Tippe auf der Abfahrtstafel auf den Stern, um eine Haltestelle hier zu speichern.</string>
+    <string name="no_upcoming_departures">Demnächst keine Abfahrten</string>
+
+    <!-- Errors -->
+    <string name="error_network">Keine Verbindung. Bitte prüfe deine Internetverbindung.</string>
+    <string name="error_server">Der Fahrplandienst antwortet gerade nicht.</string>
+    <string name="error_not_found">Nicht gefunden.</string>
+    <string name="error_unknown">Etwas ist schiefgelaufen.</string>
+    <string name="refresh_failed">Aktualisierung fehlgeschlagen – Stand %1$s</string>
+
+    <!-- Departures -->
+    <string name="updated_at">Stand %1$s</string>
+    <string name="no_departures">Keine Abfahrten in den nächsten Stunden.</string>
+    <string name="load_more">Spätere Abfahrten</string>
+    <string name="filter_all">Alle</string>
+    <string name="view_time">Nach Zeit</string>
+    <string name="view_line">Nach Linie</string>
+    <string name="now">jetzt</string>
+    <string name="minutes_short">%1$d Min.</string>
+    <string name="cancelled">Fällt aus</string>
+    <string name="platform_rail">Gl. %1$s</string>
+    <string name="platform_other">Steig %1$s</string>
+    <plurals name="alerts_count">
+        <item quantity="one">%1$d Meldung</item>
+        <item quantity="other">%1$d Meldungen</item>
+    </plurals>
+
+    <!-- Trip -->
+    <string name="realtime_data">Echtzeitdaten</string>
+    <string name="schedule_only">Nur Fahrplandaten (keine Echtzeit)</string>
+    <string name="trip_cancelled">Diese Fahrt fällt aus</string>
+    <string name="stop_cancelled">Halt entfällt</string>
+    <string name="vehicle_between">Unterwegs</string>
+    <string name="vehicle_at_stop">Hält gerade hier</string>
+    <string name="vehicle_not_started">Noch nicht abgefahren</string>
+    <string name="vehicle_finished">Am Ziel angekommen</string>
+    <string name="trip_number">Fahrt %1$s</string>
+
+    <!-- Search -->
+    <string name="search_empty">Keine Haltestellen gefunden.</string>
+    <string name="search_min_chars">Mindestens zwei Buchstaben eingeben.</string>
+
+    <!-- Distances -->
+    <string name="distance_m">%1$d m</string>
+    <string name="distance_km">%1$s km</string>
+
+    <!-- Modes -->
+    <string name="mode_long_distance">Fernverkehr</string>
+    <string name="mode_regional">Regionalverkehr</string>
+    <string name="mode_suburban">S-Bahn</string>
+    <string name="mode_subway">U-Bahn</string>
+    <string name="mode_tram">Tram</string>
+    <string name="mode_bus">Bus</string>
+    <string name="mode_coach">Fernbus</string>
+    <string name="mode_ferry">Fähre</string>
+    <string name="mode_cable">Seilbahn</string>
+    <string name="mode_on_demand">Rufbus</string>
+    <string name="mode_other">Sonstige</string>
+
+    <!-- Attribution / about -->
+    <string name="attribution">Daten: Transitous · © OpenStreetMap-Mitwirkende</string>
+    <string name="about_description">Live-Abfahrten für Bus, Tram, U-Bahn, S-Bahn und Zug in Deutschland (und darüber hinaus): Haltestellen in der Nähe, Favoriten, Verspätungen und Ausfälle auf einen Blick.</string>
+    <string name="about_version">Version %1$s</string>
+    <string name="about_data_title">Datenquellen</string>
+    <string name="about_data_text">Fahrplan- und Echtzeitdaten stammen von Transitous, einem freien, ehrenamtlich betriebenen ÖPNV-Dienst. Für Deutschland nutzt Transitous die bundesweiten DELFI-Soll- und Echtzeitdaten. Haltestellen und Karten basieren auf OpenStreetMap.</string>
+    <string name="about_link_sources">Datenquellen und Lizenzen von Transitous</string>
+    <string name="about_link_osm">OpenStreetMap-Urheberrecht</string>
+    <string name="about_link_donate">Transitous mit einer Spende unterstützen</string>
+    <string name="about_privacy_title">Datenschutz</string>
+    <string name="about_privacy_text">Die App hat kein Konto, keine Werbung und kein Tracking. Um Haltestellen in der Nähe zu finden, wird der Bereich um deinen Standort an den Transitous-Server gesendet. Favoriten werden nur auf diesem Gerät gespeichert.</string>
+    <string name="about_source_title">Quellcode</string>
+    <string name="about_link_source">Quellcode auf GitHub</string>
+    <string name="about_legend_title">Farben</string>
+    <string name="about_legend_ontime">Grün: pünktlich (Echtzeitdaten)</string>
+    <string name="about_legend_delayed">Rot: verspätet, Ausfall oder Gleiswechsel</string>
+    <string name="about_legend_schedule">Neutral: nur Fahrplan, keine Echtzeitdaten</string>
+</resources>
