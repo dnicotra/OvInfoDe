@@ -1,17 +1,28 @@
 package io.github.dnicotra.ovinfode.ui.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DepartureBoard
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,6 +38,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import io.github.dnicotra.ovinfode.R
 import io.github.dnicotra.ovinfode.data.model.Departure
+import io.github.dnicotra.ovinfode.data.model.Stop
 import io.github.dnicotra.ovinfode.data.model.TransportMode
 import io.github.dnicotra.ovinfode.ui.theme.LocalStatusColors
 import io.github.dnicotra.ovinfode.util.Countdown
@@ -89,6 +101,40 @@ private fun scheduleLine(departure: Departure) = buildAnnotatedString {
     }
 }
 
+/**
+ * Opens the trip on tap; when [onOpenStop] is given, a long press offers the departure board of
+ * the trip's final stop. [content] gets the modifier that handles the clicks.
+ */
+@Composable
+private fun DepartureClickArea(
+    departure: Departure,
+    onClick: (() -> Unit)?,
+    onOpenStop: ((Stop) -> Unit)?,
+    modifier: Modifier = Modifier,
+    content: @Composable (Modifier) -> Unit,
+) {
+    val destination = departure.destination?.toStopOrNull()?.takeIf { onOpenStop != null }
+    if (destination == null) {
+        content(modifier.then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier))
+        return
+    }
+    var menuOpen by remember { mutableStateOf(false) }
+    val label = stringResource(R.string.departures_from, destination.name)
+    Box(modifier) {
+        content(Modifier.combinedClickable(onClick = onClick ?: {}, onLongClick = { menuOpen = true }, onLongClickLabel = label))
+        DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+            DropdownMenuItem(
+                text = { Text(label) },
+                leadingIcon = { Icon(Icons.Filled.DepartureBoard, contentDescription = null) },
+                onClick = {
+                    menuOpen = false
+                    onOpenStop?.invoke(destination)
+                },
+            )
+        }
+    }
+}
+
 /** One departure on a departure board: line, destination, platform and countdown. */
 @Composable
 fun DepartureRow(
@@ -97,12 +143,13 @@ fun DepartureRow(
     onClick: (() -> Unit)?,
     modifier: Modifier = Modifier,
     showStopName: Boolean = false,
-) {
+    onOpenStop: ((Stop) -> Unit)? = null,
+) = DepartureClickArea(departure, onClick, onOpenStop, modifier) { clicks ->
     val status = LocalStatusColors.current
     Row(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+            .then(clicks)
             .padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -186,12 +233,18 @@ fun CompactDepartureRow(departure: Departure, now: Instant, modifier: Modifier =
 
 /** Departures of one line and direction in a single row: "S3 → Charlottenburg   2 · 12 · 22 min". */
 @Composable
-fun LineGroupRow(group: LineGroup, now: Instant, onClick: (Departure) -> Unit, modifier: Modifier = Modifier) {
+fun LineGroupRow(
+    group: LineGroup,
+    now: Instant,
+    onClick: (Departure) -> Unit,
+    modifier: Modifier = Modifier,
+    onOpenStop: ((Stop) -> Unit)? = null,
+) = DepartureClickArea(group.first, { onClick(group.first) }, onOpenStop, modifier) { clicks ->
     val first = group.first
     Row(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick(first) }
+            .then(clicks)
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

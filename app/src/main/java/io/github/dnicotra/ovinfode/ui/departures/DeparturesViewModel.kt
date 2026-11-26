@@ -46,6 +46,13 @@ data class DeparturesUiState(
         get() = if (filter == null) departures else departures.filter { it.line.mode == filter }
 }
 
+/**
+ * Stops opened from a trip come without their transport modes: take them from the departures,
+ * so a favourite saved from here still shows its mode icons.
+ */
+internal fun Stop.withModesFrom(departures: List<Departure>): Stop =
+    if (modes.isEmpty() && departures.isNotEmpty()) copy(modes = departures.map { it.line.mode }.toSortedSet()) else this
+
 class DeparturesViewModel(
     private val container: AppContainer,
     stop: Stop,
@@ -81,6 +88,7 @@ class DeparturesViewModel(
                 .onSuccess { result ->
                     _state.update {
                         it.copy(
+                            stop = it.stop.withModesFrom(result.departures),
                             loading = false,
                             refreshing = false,
                             error = null,

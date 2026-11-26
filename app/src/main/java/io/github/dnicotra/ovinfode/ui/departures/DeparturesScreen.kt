@@ -50,6 +50,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.dnicotra.ovinfode.R
 import io.github.dnicotra.ovinfode.data.DepartureViewMode
 import io.github.dnicotra.ovinfode.data.model.Departure
+import io.github.dnicotra.ovinfode.data.model.Stop
 import io.github.dnicotra.ovinfode.data.model.TransportMode
 import io.github.dnicotra.ovinfode.ui.components.AlertsCard
 import io.github.dnicotra.ovinfode.ui.components.AttributionFooter
@@ -72,6 +73,7 @@ fun DeparturesScreen(
     viewModel: DeparturesViewModel,
     onBack: () -> Unit,
     onOpenTrip: (Departure) -> Unit,
+    onOpenStop: (Stop) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val isFavorite by viewModel.isFavorite.collectAsStateWithLifecycle()
@@ -95,6 +97,7 @@ fun DeparturesScreen(
         onViewMode = viewModel::setViewMode,
         onLoadMore = viewModel::loadMore,
         onOpenTrip = onOpenTrip,
+        onOpenStop = onOpenStop,
     )
 }
 
@@ -112,6 +115,7 @@ fun DeparturesContent(
     onViewMode: (DepartureViewMode) -> Unit,
     onLoadMore: () -> Unit,
     onOpenTrip: (Departure) -> Unit,
+    onOpenStop: (Stop) -> Unit = {},
 ) {
     Scaffold(
         topBar = {
@@ -149,7 +153,7 @@ fun DeparturesContent(
             when {
                 state.loading && state.departures.isEmpty() -> LoadingIndicator()
                 state.error != null && state.departures.isEmpty() -> ErrorMessage(state.error, onRetry = onRefresh)
-                else -> DepartureList(state, viewMode, now, onFilter, onViewMode, onLoadMore, onOpenTrip)
+                else -> DepartureList(state, viewMode, now, onFilter, onViewMode, onLoadMore, onOpenTrip, onOpenStop)
             }
         }
     }
@@ -164,6 +168,7 @@ private fun DepartureList(
     onViewMode: (DepartureViewMode) -> Unit,
     onLoadMore: () -> Unit,
     onOpenTrip: (Departure) -> Unit,
+    onOpenStop: (Stop) -> Unit,
 ) {
     val departures = state.visibleDepartures.upcoming(now)
     // Big stations bundle several stops (e.g. the bus station next to the main station):
@@ -189,12 +194,12 @@ private fun DepartureList(
         } else if (viewMode == DepartureViewMode.BY_LINE) {
             val groups = departures.groupByLine()
             items(groups, key = { it.key }) { group ->
-                LineGroupRow(group, now, onClick = onOpenTrip)
+                LineGroupRow(group, now, onClick = onOpenTrip, onOpenStop = onOpenStop)
                 HorizontalDivider(Modifier.padding(start = 92.dp))
             }
         } else {
             items(departures, key = { "${it.tripId}|${it.scheduled}|${it.stopId}" }) { departure ->
-                DepartureRow(departure, now, onClick = { onOpenTrip(departure) }, showStopName = departure.stopName != mainStopName)
+                DepartureRow(departure, now, onClick = { onOpenTrip(departure) }, showStopName = departure.stopName != mainStopName, onOpenStop = onOpenStop)
                 HorizontalDivider(Modifier.padding(start = 92.dp))
             }
             if (state.nextPageCursor != null) {

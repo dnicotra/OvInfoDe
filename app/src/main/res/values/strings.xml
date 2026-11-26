@@ -58,6 +58,8 @@
     <string name="vehicle_not_started">Not departed yet</string>
     <string name="vehicle_finished">Arrived at the final stop</string>
     <string name="trip_number">Trip %1$s</string>
+    <string name="departures_from">Departures from %1$s</string>
+    <string name="open_departures">Open departures</string>
 
     <!-- Search -->
     <string name="search_empty">No stops found.</string>

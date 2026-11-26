@@ -4,6 +4,7 @@ package io.github.dnicotra.ovinfode.ui.trip
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -55,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.dnicotra.ovinfode.R
+import io.github.dnicotra.ovinfode.data.model.Stop
 import io.github.dnicotra.ovinfode.data.model.Trip
 import io.github.dnicotra.ovinfode.data.model.TripStop
 import io.github.dnicotra.ovinfode.ui.components.AlertsCard
@@ -73,14 +75,14 @@ import java.time.Duration
 import java.time.Instant
 
 @Composable
-fun TripScreen(viewModel: TripViewModel, onBack: () -> Unit) {
+fun TripScreen(viewModel: TripViewModel, onBack: () -> Unit, onOpenStop: (Stop) -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val now by rememberNow()
     LifecycleResumeEffect(viewModel) {
         viewModel.onResume()
         onPauseOrDispose { viewModel.onPause() }
     }
-    TripContent(state, now, onBack = onBack, onRefresh = viewModel::refresh)
+    TripContent(state, now, onBack = onBack, onRefresh = viewModel::refresh, onOpenStop = onOpenStop)
 }
 
 /** Stateless trip view, also used by the screenshot tests. */
@@ -90,6 +92,7 @@ fun TripContent(
     now: Instant,
     onBack: () -> Unit,
     onRefresh: () -> Unit,
+    onOpenStop: (Stop) -> Unit = {},
     listState: LazyListState = rememberLazyListState(),
 ) {
     val trip = state.trip
@@ -119,7 +122,7 @@ fun TripContent(
                 .padding(padding),
         ) {
             when {
-                trip != null -> TripStops(trip, state.highlightIndex, now, listState)
+                trip != null -> TripStops(trip, state.highlightIndex, now, listState, onOpenStop)
                 state.error != null -> ErrorMessage(state.error, onRetry = onRefresh)
                 else -> LoadingIndicator()
             }
@@ -128,7 +131,7 @@ fun TripContent(
 }
 
 @Composable
-private fun TripStops(trip: Trip, highlightIndex: Int, now: Instant, listState: LazyListState) {
+private fun TripStops(trip: Trip, highlightIndex: Int, now: Instant, listState: LazyListState, onOpenStop: (Stop) -> Unit) {
     val position = vehiclePosition(trip.stops, now)
     val status = LocalStatusColors.current
 
@@ -188,6 +191,7 @@ private fun TripStops(trip: Trip, highlightIndex: Int, now: Instant, listState: 
                     vehicleHere = position is VehiclePosition.AtStop && position.index == index,
                     highlighted = index == highlightIndex,
                     lineColor = trip.line.color?.let { Color(it) },
+                    onClick = stop.place.toStopOrNull()?.let { target -> { onOpenStop(target) } },
                 )
             }
             if (position is VehiclePosition.Between && position.fromIndex == index) {
@@ -217,6 +221,8 @@ private fun TripStopRow(
     vehicleHere: Boolean,
     highlighted: Boolean,
     lineColor: Color?,
+    /** Opens the stop's departure board; null for stops without an id. */
+    onClick: (() -> Unit)?,
 ) {
     val (active, inactive) = timelineColors(lineColor)
     val dimmed = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
@@ -225,6 +231,7 @@ private fun TripStopRow(
             .fillMaxWidth()
             .height(IntrinsicSize.Min)
             .then(if (highlighted) Modifier.background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)) else Modifier)
+            .then(if (onClick != null) Modifier.clickable(onClickLabel = stringResource(R.string.open_departures), onClick = onClick) else Modifier)
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

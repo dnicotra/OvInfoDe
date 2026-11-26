@@ -61,6 +61,29 @@ class TransitRepositoryTest {
     }
 
     @Test
+    fun `destinations open as stops under the name the board shows`() = runBlocking {
+        val fake = FakeTransitous(mapOf("/api/v6/stoptimes" to "stoptimes_heidelberg_hbf.json"))
+
+        val ice = TransitRepository(fake.api).departures(heidelberg, count = 10).departures.first { it.line.name == "ICE 1697" }
+        val stop = ice.destination?.toStopOrNull()
+
+        assertEquals("Stuttgart Hbf", stop?.name)
+        assertTrue("destination has a stop id", !stop?.id.isNullOrBlank())
+    }
+
+    @Test
+    fun `every stop of a trip opens as a departure board`() = runBlocking {
+        val fake = FakeTransitous(mapOf("/api/v6/trip" to "trip_ice1697.json"))
+
+        val trip = TransitRepository(fake.api).trip("20261126_07:03_de-DELFI_3490184955", contextStopId = "de-DELFI_de:08221:1160:5:8")
+        val stops = trip.stops.map { it.place.toStopOrNull() }
+
+        assertTrue("stop without id", stops.all { it != null })
+        assertEquals(trip.stops.map { it.name }, stops.map { it!!.name })
+        assertEquals("Heidelberg Hbf", stops[2]!!.name)
+    }
+
+    @Test
     fun `trip names its final stop with the town`() = runBlocking {
         val fake = FakeTransitous(mapOf("/api/v6/trip" to "trip_ice1697.json"))
 

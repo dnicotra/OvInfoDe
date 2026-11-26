@@ -15,7 +15,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -72,6 +74,21 @@ private fun NavController.navigateSafely(route: Any) {
     if (currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navigate(route)
 }
 
+/**
+ * Opens a stop's departure board. Goes back instead when that board is the screen below
+ * (stop → trip → same stop), and does nothing when it is already shown.
+ */
+private fun NavController.openStop(stop: Stop) {
+    val current = currentBackStackEntry ?: return
+    if (current.lifecycle.currentState != Lifecycle.State.RESUMED) return
+    fun NavBackStackEntry.showsStop() = destination.hasRoute<DeparturesRoute>() && toRoute<DeparturesRoute>().id == stop.id
+    when {
+        current.showsStop() -> Unit
+        previousBackStackEntry?.showsStop() == true -> popBackStack()
+        else -> navigate(stop.toRoute())
+    }
+}
+
 private fun NavController.backSafely() {
     if (currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) popBackStack()
 }
@@ -108,7 +125,7 @@ fun AppNavHost(container: AppContainer) {
         composable<HomeRoute> {
             HomeScreen(
                 viewModel = viewModel { HomeViewModel(container) },
-                onOpenStop = { nav.navigateSafely(it.toRoute()) },
+                onOpenStop = { nav.openStop(it) },
                 onSearch = { nav.navigateSafely(SearchRoute) },
                 onAbout = { nav.navigateSafely(AboutRoute) },
             )
@@ -117,7 +134,7 @@ fun AppNavHost(container: AppContainer) {
             SearchScreen(
                 viewModel = viewModel { SearchViewModel(container) },
                 onBack = { nav.backSafely() },
-                onOpenStop = { nav.navigateSafely(it.toRoute()) },
+                onOpenStop = { nav.openStop(it) },
             )
         }
         composable<DeparturesRoute> { entry ->
@@ -126,6 +143,7 @@ fun AppNavHost(container: AppContainer) {
                 viewModel = viewModel { DeparturesViewModel(container, stop) },
                 onBack = { nav.backSafely() },
                 onOpenTrip = { nav.navigateSafely(it.toTripRoute()) },
+                onOpenStop = { nav.openStop(it) },
             )
         }
         composable<TripRoute> { entry ->
@@ -133,6 +151,7 @@ fun AppNavHost(container: AppContainer) {
             TripScreen(
                 viewModel = viewModel { TripViewModel(container, route.tripId, route.fromStopId, route.fromStopName) },
                 onBack = { nav.backSafely() },
+                onOpenStop = { nav.openStop(it) },
             )
         }
         composable<AboutRoute> {

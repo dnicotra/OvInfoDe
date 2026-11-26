@@ -6,7 +6,10 @@ import java.time.Instant
 data class LatLon(val lat: Double, val lon: Double)
 
 /** A stop as it appears in a trip or as a destination. */
-data class NamedPlace(val id: String?, val name: String, val lat: Double, val lon: Double)
+data class NamedPlace(val id: String?, val name: String, val lat: Double, val lon: Double) {
+    /** The stop to open a departure board for; null for places without a stop id. */
+    fun toStopOrNull(): Stop? = id?.let { Stop(it, name, lat, lon) }
+}
 
 /** Transport modes as shown to the user (MOTIS modes folded into familiar German categories). */
 enum class TransportMode {
