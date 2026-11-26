@@ -58,6 +58,8 @@
     <string name="vehicle_not_started">Noch nicht abgefahren</string>
     <string name="vehicle_finished">Am Ziel angekommen</string>
     <string name="trip_number">Fahrt %1$s</string>
+    <string name="departures_from">Abfahrten ab %1$s</string>
+    <string name="open_departures">Abfahrten anzeigen</string>
 
     <!-- Search -->
     <string name="search_empty">Keine Haltestellen gefunden.</string>

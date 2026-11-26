@@ -82,7 +82,9 @@ class TransitRepository(
         if (known.isEmpty()) return departures
         return departures.map { departure ->
             val town = departure.candidate()?.let { known[placeKey(it)] }
-            if (town != null) departure.copy(headsign = shortStopName(qualifyName(departure.headsign, town))) else departure
+            if (town == null) return@map departure
+            val name = shortStopName(qualifyName(departure.headsign, town))
+            departure.copy(headsign = name, destination = departure.destination?.copy(name = name))
         }
     }
 }

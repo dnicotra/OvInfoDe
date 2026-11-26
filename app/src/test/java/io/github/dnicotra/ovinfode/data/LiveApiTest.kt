@@ -79,6 +79,30 @@ class LiveApiTest {
     }
 
     @Test
+    fun `stops along a trip open as full departure boards`() = runBlocking {
+        val stop = repository.searchStops("Frankfurt (Main) Hbf", near = null).first()
+        val departure = repository.departures(stop, count = 40).departures
+            .firstOrNull { it.line.mode == TransportMode.REGIONAL && !it.cancelled }
+        assumeTrue("no regional departure right now", departure != null)
+        departure!!
+
+        // Trip stops carry platform-level ids; the board must still cover the whole station.
+        val trip = repository.trip(departure.tripId, contextStopId = departure.stopId)
+        val next = trip.stops.drop(1).firstNotNullOfOrNull { it.place.toStopOrNull() }
+        assumeTrue("trip has no further stop with an id", next != null)
+        val board = repository.departures(next!!, count = 30).departures
+        println("${next.name} (${next.id}): ${board.size} departures, modes ${board.map { it.line.mode }.distinct().sorted()}")
+        assertTrue("no departures at ${next.name}", board.isNotEmpty())
+
+        val destination = departure.destination?.toStopOrNull()
+        assumeTrue("departure has no destination stop", destination != null)
+        println("destination ${destination!!.name} (${destination.id})")
+        // The final stop may have no departures left today, but the request has to work.
+        repository.departures(destination, count = 5)
+        Unit
+    }
+
+    @Test
     fun `stop search finds stations by name`() = runBlocking {
         for ((query, expected) in listOf("Alexanderplatz" to "Alexanderplatz", "Marienplatz München" to "Marienplatz", "Köln Dom" to "Dom")) {
             val first = repository.searchStops(query, near = null).firstOrNull()
