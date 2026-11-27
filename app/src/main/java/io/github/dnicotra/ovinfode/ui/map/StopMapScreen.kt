@@ -7,12 +7,6 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.RectF
-import android.graphics.Typeface
-import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -48,6 +42,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -224,12 +219,13 @@ private fun PlatformText(place: PlatformPlace, stop: Stop) {
 
 private const val MAX_LINES = 8
 
-/** The osmdroid map, with a marker per target; the selected one is centred and opened. */
+/** The osmdroid map: the stop's pin and a label per platform and other stop; the selected one is centred. */
 @Composable
 private fun StopMap(state: StopMapUiState, onSelect: (MapTarget) -> Unit) {
     val context = LocalContext.current
     val lifecycle = LocalLifecycleOwner.current.lifecycle
-    val labels = state.targets.associateWith { markerLabel(it) }
+    val texts = state.targets.associateWith { markerLabel(it) }
+    val currentOnSelect by rememberUpdatedState(onSelect)
     val mapView = remember {
         MapView(context).apply {
             setTileSource(TileSourceFactory.MAPNIK)
@@ -243,6 +239,7 @@ private fun StopMap(state: StopMapUiState, onSelect: (MapTarget) -> Unit) {
             }
         }
     }
+    val mapLabels = remember { MapLabels(context) { currentOnSelect(it) } }
     DisposableEffect(lifecycle, mapView) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
@@ -261,27 +258,25 @@ private fun StopMap(state: StopMapUiState, onSelect: (MapTarget) -> Unit) {
         factory = { mapView },
         modifier = Modifier.fillMaxSize(),
         update = { map ->
-            map.overlays.removeAll { it is Marker }
-            state.targets.forEach { target ->
-                val marker = Marker(map).apply {
-                    position = target.location.toGeoPoint()
-                    title = labels[target]
-                    val isSelected = target == state.selected
-                    when (target) {
-                        is MapTarget.WholeStop -> setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                        else -> {
-                            val (background, text) = labelColors(target)
-                            icon = labelIcon(map.context, labels[target].orEmpty(), background, text, isSelected)
-                            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                        }
-                    }
-                    setOnMarkerClickListener { _, _ ->
-                        onSelect(target)
-                        true
-                    }
+            map.overlays.removeAll { it is Marker || it is MapLabels }
+            val pin = Marker(map).apply {
+                position = state.stop.location.toGeoPoint()
+                title = state.stop.name
+                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                setOnMarkerClickListener { _, _ ->
+                    onSelect(MapTarget.WholeStop(state.stop))
+                    true
                 }
-                map.overlays += marker
             }
+            map.overlays += pin
+            // The selected label first: it is laid out first, so it never has to give way.
+            val labels = state.targets.filter { it !is MapTarget.WholeStop }.sortedByDescending { it == state.selected }.map { target ->
+                val selected = target == state.selected
+                val (background, text) = labelColors(target)
+                MapLabels.Label(target, labelBitmap(map.context, texts[target].orEmpty(), background, text, selected), background, selected)
+            }
+            mapLabels.show(labels, pin.position, pin.icon?.intrinsicWidth ?: 0, pin.icon?.intrinsicHeight ?: 0)
+            map.overlays += mapLabels
             map.controller.animateTo(state.selected.location.toGeoPoint())
             map.invalidate()
         },
@@ -296,61 +291,6 @@ private fun markerLabel(target: MapTarget): String = when (target) {
         platformText(if (target.place.platforms.size > 1) "$first…" else first, target.place.mode)
     } ?: target.place.lines.take(3).joinToString(" ") { it.name }
     is MapTarget.OtherStop -> target.nearby.stop.name.let { if (it.length > 18) it.take(17) + "…" else it }
-}
-
-// Marker colours do not follow the app's theme: the map underneath is always light.
-private const val PLATFORM_LABEL = 0xFF1F3A5F.toInt()
-private const val OTHER_STOP_LABEL = 0xFF4A4A4A.toInt()
-private const val WHITE = 0xFFFFFFFF.toInt()
-private const val BLACK = 0xFF000000.toInt()
-
-/**
- * Background and text colour of a marker: a platform in the colour of its main line, as on
- * the line badges, where the feed has one; otherwise dark blue, other stops dark grey.
- */
-internal fun labelColors(target: MapTarget): Pair<Int, Int> {
-    if (target is MapTarget.Platform) {
-        val line = target.place.lines.firstOrNull { it.color != null }
-        val background = line?.color
-        if (background != null) return background to (line.textColor ?: readableTextOn(background))
-        return PLATFORM_LABEL to WHITE
-    }
-    return OTHER_STOP_LABEL to WHITE
-}
-
-/** White or black, whichever reads better on [background] (relative luminance, WCAG). */
-internal fun readableTextOn(background: Int): Int {
-    fun channel(shift: Int): Double {
-        val c = ((background shr shift) and 0xFF) / 255.0
-        return if (c <= 0.03928) c / 12.92 else Math.pow((c + 0.055) / 1.055, 2.4)
-    }
-    val luminance = 0.2126 * channel(16) + 0.7152 * channel(8) + 0.0722 * channel(0)
-    // Contrast with white (1.05 / (L + 0.05)) against contrast with black ((L + 0.05) / 0.05).
-    return if (1.05 / (luminance + 0.05) >= (luminance + 0.05) / 0.05) WHITE else BLACK
-}
-
-/** A rounded label with [text] in [textColor] on [background], larger and outlined when [selected]. */
-private fun labelIcon(context: Context, text: String, background: Int, textColor: Int, selected: Boolean): BitmapDrawable {
-    val density = context.resources.displayMetrics.density
-    val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        textSize = (if (selected) 15 else 13) * density
-        typeface = Typeface.DEFAULT_BOLD
-        color = textColor
-    }
-    val padH = 8 * density
-    val padV = 5 * density
-    // A thin outline keeps light labels apart from the map; the selected one gets a thick one.
-    val border = (if (selected) 3 else 1) * density
-    val width = paint.measureText(text) + 2 * padH + 2 * border
-    val height = paint.fontMetrics.let { it.descent - it.ascent } + 2 * padV + 2 * border
-    val bitmap = Bitmap.createBitmap(width.toInt().coerceAtLeast(1), height.toInt().coerceAtLeast(1), Bitmap.Config.ARGB_8888)
-    val canvas = Canvas(bitmap)
-    val radius = 8 * density
-    val outline = if (selected) WHITE else 0x99000000.toInt()
-    canvas.drawRoundRect(RectF(0f, 0f, width, height), radius, radius, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = outline })
-    canvas.drawRoundRect(RectF(border, border, width - border, height - border), radius, radius, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = background })
-    canvas.drawText(text, border + padH, border + padV - paint.fontMetrics.ascent, paint)
-    return BitmapDrawable(context.resources, bitmap)
 }
 
 private fun LatLon.toGeoPoint() = GeoPoint(lat, lon)
