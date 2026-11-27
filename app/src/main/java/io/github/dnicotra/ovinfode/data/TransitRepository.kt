@@ -1,5 +1,7 @@
 package io.github.dnicotra.ovinfode.data
 
+import io.github.dnicotra.ovinfode.country.Countries
+import io.github.dnicotra.ovinfode.country.Country
 import io.github.dnicotra.ovinfode.country.country
 import io.github.dnicotra.ovinfode.data.api.ApiException
 import io.github.dnicotra.ovinfode.data.api.TransitousApi
@@ -17,18 +19,39 @@ import io.github.dnicotra.ovinfode.util.placeKey
 import io.github.dnicotra.ovinfode.util.qualifyName
 import kotlinx.serialization.SerializationException
 import java.io.IOException
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.cancellation.CancellationException
 
 class TransitRepository(
     private val api: TransitousApi,
     private val towns: TownResolver = TownResolver(api),
+    /** The language the user reads (for tests; the app follows the device). */
+    private val userLanguage: () -> String = TransitousApi::defaultLanguage,
 ) {
+    /**
+     * Where the departure boards were that listed a stop id: trips opened from a board are
+     * asked for in that board's language (see [Country.requestLanguage]).
+     */
+    private val boardLocations = ConcurrentHashMap<String, LatLon>()
 
+    /** The language to ask for places [at] this position, in country [country]. */
+    private fun languageAt(at: LatLon, country: Country = Countries.at(at)): String =
+        country.requestLanguage(userLanguage(), at)
+
+    /**
+     * Stops matching [query]. The geocoder answers with the name in the language that matched,
+     * so the user's language is fine everywhere. Stops of one name a few steps apart
+     * (platforms of De Lijn, the same station in two feeds) share their departures: kept once.
+     */
     suspend fun searchStops(query: String, near: LatLon?): List<Stop> =
-        api.geocode(query, near)
+        api.geocode(query, near, language = userLanguage())
             .filter { it.type == "STOP" }
             .map { it.toStop() }
             .distinctBy { it.id }
+            .fold(mutableListOf()) { kept, stop ->
+                if (kept.none { it.name == stop.name && distanceMeters(it.location, stop.location) < SAME_STOP_METERS }) kept += stop
+                kept
+            }
 
     /**
      * Stops around [center], closest first. Starts with a small radius and widens it in
@@ -39,7 +62,7 @@ class TransitRepository(
         var result: List<NearbyStop> = emptyList()
         while (radius <= 4000) {
             val (min, max) = boundingBox(center, radius)
-            result = api.mapStops(min, max)
+            result = api.mapStops(min, max, language = languageAt(center))
                 .filter { it.stopId != null }
                 .map { place -> NearbyStop(place.toStop(), distanceMeters(center, LatLon(place.lat, place.lon)).toInt()) }
                 .filter { it.distanceMeters <= radius }
@@ -54,20 +77,28 @@ class TransitRepository(
     }
 
     suspend fun departures(stop: Stop, count: Int, pageCursor: String? = null): StopDepartures {
-        val result = api.stopTimes(stop.id, stop.location, count, pageCursor).toStopDepartures()
+        val language = languageAt(stop.location, stop.country())
+        val result = api.stopTimes(stop.id, stop.location, count, pageCursor, language).toStopDepartures(userLanguage())
+        if (boardLocations.size > MAX_BOARD_LOCATIONS) boardLocations.clear()
+        boardLocations[stop.id] = stop.location
+        result.departures.forEach { departure -> departure.stopId?.let { boardLocations[it] = stop.location } }
         return result.copy(departures = withTowns(result.departures, contextStopId = stop.id))
     }
 
     /** A trip with all its stops; [contextStopId] is the stop the user came from. */
     suspend fun trip(tripId: String, contextStopId: String? = null): Trip {
-        val trip = api.trip(tripId).toTrip(tripId)
+        // The trip's feed decides; without a board to go by (e.g. after the app was restarted), the country's default.
+        val board = contextStopId?.let { boardLocations[it] }
+        val country = Countries.ofTrip(tripId) ?: board?.let { Countries.at(it) }
+        val language = country?.requestLanguage(userLanguage(), board) ?: userLanguage()
+        val trip = api.trip(tripId, language).toTrip(tripId, userLanguage())
         val context = contextStopId ?: trip.stops.firstOrNull()?.id
         val candidates = trip.stops.map { it.place }.filter { it.country().needsTown(it, context) }
         if (candidates.isEmpty()) return trip
         val known = towns.towns(candidates)
         if (known.isEmpty()) return trip
         val stops = trip.stops.map { stop ->
-            known[placeKey(stop.place)]?.let { town -> stop.copy(name = stop.place.country().stopName(qualifyName(stop.name, town))) } ?: stop
+            known[placeKey(stop.place)]?.let { town -> stop.copy(name = stop.place.country().stopName(qualifyName(stop.name, town), Countries.ofFeed(stop.id), stop.id)) } ?: stop
         }
         val headsign = if (trip.headsign == trip.stops.lastOrNull()?.name) stops.last().name else trip.headsign
         return trip.copy(stops = stops, headsign = headsign)
@@ -84,11 +115,14 @@ class TransitRepository(
         return departures.map { departure ->
             val destination = departure.candidate() ?: return@map departure
             val town = known[placeKey(destination)] ?: return@map departure
-            val name = destination.country().stopName(qualifyName(departure.headsign, town))
+            val name = destination.country().stopName(qualifyName(departure.headsign, town), Countries.ofTrip(departure.tripId), destination.id)
             departure.copy(headsign = name, destination = departure.destination?.copy(name = name))
         }
     }
 }
+
+private const val MAX_BOARD_LOCATIONS = 2000
+private const val SAME_STOP_METERS = 300
 
 /** Runs [block], turning failures (but not cancellation) into a [Result]. */
 suspend fun <T> safeCall(block: suspend () -> T): Result<T> = try {

@@ -19,7 +19,7 @@ import io.github.dnicotra.ovinfode.util.shortStopName
  * To support another country:
  * 1. add an object like [Netherlands] that overrides what differs from the defaults here,
  * 2. list it in [Countries.all],
- * 3. generate its outline: `python3 tools/country_outlines.py NL DE IT LU XX > …/country/CountryOutlines.kt`,
+ * 3. generate its outline: `python3 tools/country_outlines.py NL DE IT LU BE BE-VLG BE-BRU XX > …/country/CountryOutlines.kt`,
  * 4. add a `values-xx/strings.xml` translation if it speaks a new language.
  */
 abstract class Country(
@@ -46,16 +46,35 @@ abstract class Country(
     protected open fun localStopName(name: String): String = name
 
     /**
+     * Like [localStopName], for countries whose feeds each name their stops their own way:
+     * [stopId], the Transitous id of the stop if known, tells which feed it comes from.
+     */
+    protected open fun localStopName(name: String, stopId: String?): String = localStopName(name)
+
+    /**
      * Fixes for names as this country's timetable feeds write them, for stops of these feeds
      * abroad (e.g. Italian feeds write "ZURIGO HB" in capitals). Usually part of [localStopName].
      */
     protected open fun feedName(name: String): String = name
 
-    /** The name to show for a stop in this country; [feed] is the country of the timetable feed it comes from, if known. */
-    fun stopName(name: String, feed: Country? = null): String {
+    /**
+     * The name to show for a stop in this country; [feed] is the country of the timetable feed it
+     * comes from and [stopId] its Transitous id, if known.
+     */
+    fun stopName(name: String, feed: Country? = null, stopId: String? = null): String {
         val repaired = repairEncoding(name)
-        return shortStopName(localStopName(if (feed != null && feed !== this) feed.feedName(repaired) else repaired))
+        return shortStopName(localStopName(if (feed != null && feed !== this) feed.feedName(repaired) else repaired, stopId))
     }
+
+    /** The destination to show for a trip of this country's feeds, given its [headsign] and the name of its [finalStop]. */
+    open fun headsign(headsign: String, finalStop: String?): String = headsign
+
+    /**
+     * The language to ask the API for when showing places [at] this position (null: not known)
+     * to someone who reads [userLanguage]. Usually that language; countries whose feeds only
+     * translate well into some languages pick the local one instead.
+     */
+    open fun requestLanguage(userLanguage: String, at: LatLon?): String = userLanguage
 
     /**
      * The line as people here know it, for trips of this country's timetable feeds
@@ -103,8 +122,11 @@ abstract class Country(
 object OtherCountry : Country("")
 
 object Countries {
-    /** Countries with rules of their own. Where outlines overlap at a border, the first one wins. */
-    val all: List<Country> = listOf(Netherlands, Germany, Italy, Luxembourg)
+    /**
+     * Countries with rules of their own. Where outlines overlap at a border, the country of the
+     * stop's feed wins, otherwise the first one.
+     */
+    val all: List<Country> = listOf(Netherlands, Germany, Italy, Luxembourg, Belgium)
 
     fun byCode(code: String?): Country? = code?.let { c -> all.firstOrNull { it.code.equals(c, ignoreCase = true) } }
 
@@ -114,24 +136,28 @@ object Countries {
      * covers Dutch stations, an Austrian feed German ones), so this goes by:
      * 1. the code of a country in [all] at the start of the feed's id ("de:…", "NL:S:…"), which is exact,
      *    or the country that the id of the feed's own country encodes (Luxembourg's "000200405020"),
-     * 2. the outlines of the countries in [all],
+     * 2. the outlines of the countries in [all] (at borders, where they overlap, the feed's country first),
      * 3. the feed's country, for stops just outside its outline (coast, ferry piers), unless
      *    the id has a prefix like a country code.
      */
     fun of(stopId: String?, lat: Double, lon: Double): Country {
         val feed = stopId?.substringBefore('_', missingDelimiterValue = "").orEmpty()
         val local = stopId?.substringAfter('_').orEmpty()
-        // Other two-letter prefixes ("fr:…" in DELFI, but also "gs:delijn:…") are no proof of anything.
+        // Other country codes ("fr:…" in DELFI) are no proof of anything.
         val localCode = localCountryCode.find(local)?.groupValues?.get(1)
         byCode(localCode)?.let { return it }
         val feedCountry = feedCountryCode.find(feed)?.let { byCode(it.groupValues[1]) }
         // Unlike a prefix, a feed's own id scheme is proof, also of a country without rules.
         if (localCode == null) feedCountry?.countryInStopId(local)?.let { return byCode(it) ?: OtherCountry }
         val point = LatLon(lat, lon)
-        all.firstOrNull { it.outline?.contains(point) == true }?.let { return it }
+        val inside = all.filter { it.outline?.contains(point) == true }
+        (inside.firstOrNull { it == feedCountry } ?: inside.firstOrNull())?.let { return it }
         if (localCode == null && feedCountry != null && feedCountry.outline?.isNear(point, km = feedCountry.nearKm) == true) return feedCountry
         return OtherCountry
     }
+
+    /** The country at a position (for places without a stop id). */
+    fun at(point: LatLon): Country = of(null, point.lat, point.lon)
 
     /** Country of the timetable feed a stop comes from ("it-trenitalia_01700:station"), if it has rules. */
     fun ofFeed(stopId: String?): Country? =
@@ -140,7 +166,8 @@ object Countries {
     /** Country of the timetable feed a trip comes from ("20261126_09:27_nl-OpenOV_395288670"), if it has rules. */
     fun ofTrip(tripId: String?): Country? = tripId?.let { tripFeedCode.find(it) }?.let { byCode(it.groupValues[1]) }
 
-    private val localCountryCode = Regex("""^([A-Za-z]{2}):[A-Za-z0-9]""")
+    // "gs:delijn:…" and "gs:tec:…" (Belgian feeds) are GTFS stop namespaces, not country codes.
+    private val localCountryCode = Regex("""^(?!gs:)([A-Za-z]{2}):[A-Za-z0-9]""")
     private val feedCountryCode = Regex("""^([a-z]{2})-""")
     private val tripFeedCode = Regex("""^\d{8}_\d{1,2}:\d{2}_([a-z]{2})-""")
 }

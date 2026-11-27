@@ -58,7 +58,7 @@ class UserPrefs(private val store: DataStore<Preferences>) {
             Stop(
                 id = it.id,
                 // Favourites saved by older versions get the current names too.
-                name = Countries.of(it.id, it.lat, it.lon).stopName(it.name),
+                name = Countries.of(it.id, it.lat, it.lon).stopName(it.name, Countries.ofFeed(it.id), it.id),
                 lat = it.lat,
                 lon = it.lon,
                 area = it.area,

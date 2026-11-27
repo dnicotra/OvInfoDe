@@ -88,10 +88,10 @@
 
     <!-- Attribution / about -->
     <string name="attribution">Gegevens: Transitous · © OpenStreetMap-bijdragers</string>
-    <string name="about_description">Actuele vertrektijden van bus, tram, metro en trein in Nederland, Duitsland, Italië en Luxemburg (en daarbuiten): haltes in de buurt, favorieten, vertragingen en uitval in één oogopslag.</string>
+    <string name="about_description">Actuele vertrektijden van bus, tram, metro en trein in Nederland, België, Duitsland, Italië en Luxemburg (en daarbuiten): haltes in de buurt, favorieten, vertragingen en uitval in één oogopslag.</string>
     <string name="about_version">Versie %1$s</string>
     <string name="about_data_title">Gegevensbronnen</string>
-    <string name="about_data_text">Dienstregelingen en actuele gegevens komen van Transitous, een gratis openbaarvervoerdienst die door vrijwilligers wordt beheerd. Voor Nederland gebruikt Transitous de landelijke dienstregeling en actuele gegevens van OpenOV, voor Duitsland die van DELFI, voor Italië die van Trenitalia, Trenord en de regionale en stedelijke vervoerders (veel via BusOne), voor Luxemburg de landelijke dienstregeling van de Administration des transports publics (zonder actuele gegevens). Haltes en kaarten zijn gebaseerd op OpenStreetMap.</string>
+    <string name="about_data_text">Dienstregelingen en actuele gegevens komen van Transitous, een gratis openbaarvervoerdienst die door vrijwilligers wordt beheerd. Voor Nederland gebruikt Transitous de landelijke dienstregeling en actuele gegevens van OpenOV, voor België die van NMBS, MIVB, De Lijn en TEC, voor Duitsland die van DELFI, voor Italië die van Trenitalia, Trenord en de regionale en stedelijke vervoerders (veel via BusOne), voor Luxemburg de landelijke dienstregeling van de Administration des transports publics (zonder actuele gegevens). Haltes en kaarten zijn gebaseerd op OpenStreetMap.</string>
     <string name="about_link_sources">Gegevensbronnen en licenties van Transitous</string>
     <string name="about_link_osm">Auteursrecht van OpenStreetMap</string>
     <string name="about_link_donate">Steun Transitous met een donatie</string>
