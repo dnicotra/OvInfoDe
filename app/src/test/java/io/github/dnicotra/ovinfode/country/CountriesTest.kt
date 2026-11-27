@@ -2,6 +2,7 @@ package io.github.dnicotra.ovinfode.country
 
 import io.github.dnicotra.ovinfode.data.model.LatLon
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
@@ -47,6 +48,28 @@ class CountriesTest {
         assertSame(OtherCountry, of("be-sncb_S8814001", 50.83571, 4.33653)) // Brussels
         assertSame(OtherCountry, of("ch-opentransportdataswiss26_Parentch:1:sloid:10", 47.54741, 7.58956)) // Basel SBB
         assertSame(OtherCountry, of("at-Railway-Current-Reference-Data-2026_Pat:45:50002", 47.81306, 13.04513)) // Salzburg Hbf
+    }
+
+    @Test
+    fun `luxembourg stops go by their id, also right on the border rivers`() {
+        val atp = "lu-administration-des-transports-publics_"
+        // Towns on the Our, Sûre and Moselle, which the simplified outlines put in Germany.
+        assertSame(Luxembourg, of(atp + "000130301006", 49.933483, 6.212653)) // Vianden, Gare
+        assertSame(Luxembourg, of(atp + "000170501016", 49.81023, 6.417321)) // Echternach, Gare Centre
+        assertSame(Luxembourg, of(atp + "000210701006", 49.542736, 6.368293)) // Remich, Gare routière
+        assertSame(Luxembourg, of(atp + "000180703009", 49.71295, 6.499305)) // Wasserbillig, Gare
+        assertSame(Luxembourg, of(atp + "000110407001", 50.036484, 6.129956)) // Rodershausen, Kiirch
+        assertSame(Luxembourg, of(atp + "000200405020", 49.6115, 6.126)) // Hamilius
+        // Stops abroad in the same feed: Germany by its id, Belgium and France without rules.
+        assertSame(Germany, of(atp + "000500000019", 49.707375, 6.550666)) // Igel
+        assertSame(Germany, of(atp + "000500000075", 49.689728, 6.46192)) // Temmels, across the Moselle
+        assertSame(OtherCountry, of(atp + "000300000017", 49.563934, 5.82912)) // Athus, Gare
+        assertSame(OtherCountry, of(atp + "000400000106", 49.456738, 6.07897)) // Volmerange-les-Mines, Gare
+        // Luxembourg stations in the German feed have "lu:" ids, in the French and Belgian ones none.
+        assertSame(Luxembourg, of("de-DELFI_lu:25000:NVBW_003", 49.59981, 6.13413))
+        assertSame(Luxembourg, of("fr-horaires-sncf_FR::LMU:c24c10e0-fa0b-11e9-b755-b1228bd14244:", 49.5997, 6.1347))
+        assertSame(Luxembourg, of("be-sncb_8200100", 49.6, 6.1333))
+        assertSame(Luxembourg, Countries.ofTrip("20261127_09:33_lu-administration-des-transports-publics_24658350"))
     }
 
     @Test
@@ -116,6 +139,8 @@ class CountriesTest {
         assertTrue(LatLon(52.52, 13.40) in Germany.outline) // Berlin
         assertTrue(LatLon(48.14, 11.58) in Germany.outline) // Munich
         assertTrue(LatLon(41.90, 12.50) in Italy.outline) // Rome
+        assertTrue(LatLon(49.61, 6.13) in Luxembourg.outline) // Luxembourg City
+        assertFalse(LatLon(49.757, 6.651) in Luxembourg.outline) // Trier
         assertTrue(Netherlands.outline.isNear(LatLon(52.37, 4.70), km = 10.0)) // North Sea off Zandvoort
         assertEquals(listOf(LatLon(38.5, -120.2), LatLon(40.7, -120.95), LatLon(43.252, -126.453)), decodePolyline("_p~iF~ps|U_ulLnnqC_mqNvxq`@"))
         // Line breaks of the generated source are ignored.
@@ -127,6 +152,7 @@ class CountriesTest {
         assertSame(Netherlands, Countries.byCode("NL"))
         assertSame(Germany, Countries.byCode("de"))
         assertSame(Italy, Countries.byCode("IT"))
+        assertSame(Luxembourg, Countries.byCode("LU"))
         assertNull(Countries.byCode("be"))
         assertNull(Countries.byCode(null))
     }

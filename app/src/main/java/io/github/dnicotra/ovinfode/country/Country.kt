@@ -19,7 +19,7 @@ import io.github.dnicotra.ovinfode.util.shortStopName
  * To support another country:
  * 1. add an object like [Netherlands] that overrides what differs from the defaults here,
  * 2. list it in [Countries.all],
- * 3. generate its outline: `python3 tools/country_outlines.py NL DE IT XX > …/country/CountryOutlines.kt`,
+ * 3. generate its outline: `python3 tools/country_outlines.py NL DE IT LU XX > …/country/CountryOutlines.kt`,
  * 4. add a `values-xx/strings.xml` translation if it speaks a new language.
  */
 abstract class Country(
@@ -31,6 +31,16 @@ abstract class Country(
 
     /** How far outside [outline] stops of this country's feeds still belong to it (piers, islands the outline lacks). */
     internal open val nearKm: Double = 3.0
+
+    /** False when Transitous has no real-time data for this country's own transport (the board says so). */
+    open val hasRealtimeData: Boolean = true
+
+    /**
+     * The country code that a stop id of this country's own feed encodes, for feeds whose ids say
+     * where a stop is in a way of their own (Luxembourg's); null when the id does not say.
+     * [localId] is the id without the feed name.
+     */
+    internal open fun countryInStopId(localId: String): String? = null
 
     /** Country-specific stop name fixes, applied before the general rules of [shortStopName]. */
     protected open fun localStopName(name: String): String = name
@@ -94,7 +104,7 @@ object OtherCountry : Country("")
 
 object Countries {
     /** Countries with rules of their own. Where outlines overlap at a border, the first one wins. */
-    val all: List<Country> = listOf(Netherlands, Germany, Italy)
+    val all: List<Country> = listOf(Netherlands, Germany, Italy, Luxembourg)
 
     fun byCode(code: String?): Country? = code?.let { c -> all.firstOrNull { it.code.equals(c, ignoreCase = true) } }
 
@@ -103,6 +113,7 @@ object Countries {
      * "de-DELFI_de:08111:6115:2:3" or "nl-OpenOV_3980180". The feed says little (DELFI also
      * covers Dutch stations, an Austrian feed German ones), so this goes by:
      * 1. the code of a country in [all] at the start of the feed's id ("de:…", "NL:S:…"), which is exact,
+     *    or the country that the id of the feed's own country encodes (Luxembourg's "000200405020"),
      * 2. the outlines of the countries in [all],
      * 3. the feed's country, for stops just outside its outline (coast, ferry piers), unless
      *    the id has a prefix like a country code.
@@ -113,12 +124,12 @@ object Countries {
         // Other two-letter prefixes ("fr:…" in DELFI, but also "gs:delijn:…") are no proof of anything.
         val localCode = localCountryCode.find(local)?.groupValues?.get(1)
         byCode(localCode)?.let { return it }
+        val feedCountry = feedCountryCode.find(feed)?.let { byCode(it.groupValues[1]) }
+        // Unlike a prefix, a feed's own id scheme is proof, also of a country without rules.
+        if (localCode == null) feedCountry?.countryInStopId(local)?.let { return byCode(it) ?: OtherCountry }
         val point = LatLon(lat, lon)
         all.firstOrNull { it.outline?.contains(point) == true }?.let { return it }
-        if (localCode == null) {
-            val feedCountry = feedCountryCode.find(feed)?.let { byCode(it.groupValues[1]) }
-            if (feedCountry != null && feedCountry.outline?.isNear(point, km = feedCountry.nearKm) == true) return feedCountry
-        }
+        if (localCode == null && feedCountry != null && feedCountry.outline?.isNear(point, km = feedCountry.nearKm) == true) return feedCountry
         return OtherCountry
     }
 

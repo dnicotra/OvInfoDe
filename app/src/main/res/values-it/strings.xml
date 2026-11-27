@@ -33,6 +33,7 @@
 
     <!-- Departures -->
     <string name="updated_at">Aggiornato alle %1$s</string>
+    <string name="timetable_only_here">solo orario programmato, qui nessun dato in tempo reale</string>
     <string name="no_departures">Nessuna partenza nelle prossime ore.</string>
     <string name="load_more">Partenze successive</string>
     <string name="filter_all">Tutti</string>
@@ -87,10 +88,10 @@
 
     <!-- Attribution / about -->
     <string name="attribution">Dati: Transitous · © collaboratori di OpenStreetMap</string>
-    <string name="about_description">Partenze in tempo reale di bus, tram, metro e treni in Italia, Germania e Paesi Bassi (e non solo): fermate vicine, preferiti, ritardi e soppressioni a colpo d\'occhio.</string>
+    <string name="about_description">Partenze in tempo reale di bus, tram, metro e treni in Italia, Germania, Paesi Bassi e Lussemburgo (e non solo): fermate vicine, preferiti, ritardi e soppressioni a colpo d\'occhio.</string>
     <string name="about_version">Versione %1$s</string>
     <string name="about_data_title">Fonti dei dati</string>
-    <string name="about_data_text">Orari e dati in tempo reale sono forniti da Transitous, un servizio di trasporto pubblico gratuito gestito da volontari. Per l\'Italia Transitous usa gli orari di Trenitalia, Trenord e delle aziende regionali e cittadine (molti tramite BusOne), per la Germania quelli di DELFI, per i Paesi Bassi quelli di OpenOV. Fermate e mappe si basano su OpenStreetMap.</string>
+    <string name="about_data_text">Orari e dati in tempo reale sono forniti da Transitous, un servizio di trasporto pubblico gratuito gestito da volontari. Per l\'Italia Transitous usa gli orari di Trenitalia, Trenord e delle aziende regionali e cittadine (molti tramite BusOne), per la Germania quelli di DELFI, per i Paesi Bassi quelli di OpenOV, per il Lussemburgo l\'orario nazionale dell\'Administration des transports publics (senza tempo reale). Fermate e mappe si basano su OpenStreetMap.</string>
     <string name="about_link_sources">Fonti dei dati e licenze di Transitous</string>
     <string name="about_link_osm">Copyright di OpenStreetMap</string>
     <string name="about_link_donate">Sostieni Transitous con una donazione</string>

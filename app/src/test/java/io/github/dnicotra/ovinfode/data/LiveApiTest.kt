@@ -1,6 +1,7 @@
 package io.github.dnicotra.ovinfode.data
 
 import io.github.dnicotra.ovinfode.country.Italy
+import io.github.dnicotra.ovinfode.country.Luxembourg
 import io.github.dnicotra.ovinfode.country.Netherlands
 import io.github.dnicotra.ovinfode.country.country
 import io.github.dnicotra.ovinfode.data.api.TransitousApi
@@ -229,6 +230,34 @@ class LiveApiTest {
         val nearby = repository.nearbyStops(LatLon(45.4642, 9.1900))
         println("nearby: " + nearby.joinToString { "${it.stop.name} ${it.distanceMeters} m" })
         assertTrue(nearby.any { it.stop.name.startsWith("Duomo") })
+    }
+
+    @Test
+    fun `luxembourg boards show every train once and need no town lookups`() = runBlocking {
+        val problems = mutableListOf<String>()
+        for (query in listOf("Luxembourg Gare", "Esch-sur-Alzette, Gare", "Ettelbruck, Gare", "Hamilius", "Kirchberg, Luxexpo", "Wasserbillig, Gare")) {
+            val stop = repository.searchStops(query, near = null).firstOrNull()
+            if (stop == null || stop.country() != Luxembourg) {
+                problems += "$query: found ${stop?.name} (${stop?.id}, ${stop?.country()})"
+                continue
+            }
+            val before = townLookups.get()
+            val departures = repository.departures(stop, count = 40).departures
+            val lookups = townLookups.get() - before
+            println(String.format("%-36s %3d departures  %2d real-time  %2d lookups  lines %s", stop.name.take(36), departures.size,
+                departures.count { it.isRealtime }, lookups, departures.map { it.line.name }.distinct().take(14)))
+            println("    " + departures.map { it.headsign }.distinct().take(12).joinToString(" | "))
+            if (departures.isEmpty()) problems += "${stop.name}: no departures"
+            val abroad = departures.mapNotNull { it.destination }.filter { it.country() != Luxembourg }.distinctBy { it.name }
+            if (lookups > abroad.size) problems += "${stop.name}: $lookups town lookups for ${abroad.map { it.name }}"
+            departures.filter { it.headsign.isBlank() }.forEach { problems += "${stop.name}: ${it.line.name} has no destination" }
+            // A train in several feeds is shown once (numbers 2n and 2n+1 are one French train).
+            departures.filter { it.line.mode.isRail && it.tripNumber?.all(Char::isDigit) == true }
+                .groupBy { it.scheduled to it.tripNumber!!.trimStart('0').toLong() / 2 }
+                .filterValues { it.size > 1 }
+                .forEach { (_, same) -> problems += "${stop.name}: twice " + same.joinToString { "${it.line.name} ${it.tripNumber} → ${it.headsign}" } }
+        }
+        assertTrue(problems.joinToString("\n"), problems.isEmpty())
     }
 
     @Test

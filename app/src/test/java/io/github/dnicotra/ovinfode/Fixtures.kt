@@ -16,6 +16,9 @@ import io.github.dnicotra.ovinfode.data.toTrip
  * timetables for the morning (Roma Termini from 08:00, the others from 08:30; no real-time data at
  * that hour) and the night buses at Torino Porta Nuova as they ran, from Trenitalia, ATAC/Roma
  * Mobilità, ATM, Trenord and GTT via Transitous (and BusOne).
+ * The Luxembourg ones (luxembourg, lu_re5113) were recorded at 00:50 local time for the next
+ * morning from 08:30 (07:30 UTC), so without real-time data: timetables of the Administration
+ * des transports publics, DELFI e.V. and SNCF.
  */
 object Fixtures {
     fun text(name: String): String = requireNotNull(Fixtures::class.java.getResource("/fixtures/$name")) { "missing fixture $name" }.readText()
@@ -26,13 +29,18 @@ object Fixtures {
         "stoptimes_milano_cadorna.json", "stoptimes_torino_porta_nuova.json", "trip_fr9490.json", "mapstops_milano_duomo.json",
     )
 
+    /** The Luxembourg recordings. */
+    val luxembourgish = listOf(
+        "stoptimes_luxembourg_gare.json", "stoptimes_luxembourg_gare_tram.json", "trip_lu_re5113.json", "mapstops_luxembourg_gare.json",
+    )
+
     /** Every recorded response except the reverse geocoding answers. */
     val all = listOf(
         "stoptimes_berlin_alexanderplatz.json", "stoptimes_koeln_hbf.json", "stoptimes_heidelberg_hbf.json",
         "trip_s3.json", "trip_ice1697.json", "geocode_alexanderplatz.json", "mapstops_koeln.json",
         "stoptimes_amsterdam_centraal.json", "stoptimes_utrecht_centraal.json", "stoptimes_amsterdam_leidseplein.json",
         "trip_ic2735.json", "trip_iff_ic3531.json", "mapstops_amsterdam_dam.json",
-    ) + italian
+    ) + italian + luxembourgish
 
     fun stopTimes(name: String): StopDepartures =
         TransitousApi.json.decodeFromString<StopTimesResponse>(text(name)).toStopDepartures()
@@ -46,6 +54,9 @@ object Fixtures {
 
     val romaTermini: StopDepartures get() = stopTimes("stoptimes_roma_termini.json")
     val milanoDuomo: StopDepartures get() = stopTimes("stoptimes_milano_duomo.json")
+
+    /** Luxembourg station (the stop of the French feed, which groups the platforms of every feed). */
+    val luxembourg: StopDepartures get() = stopTimes("stoptimes_luxembourg_gare.json")
 
     fun trip(name: String, tripId: String, language: String = "en"): Trip =
         TransitousApi.json.decodeFromString<ItineraryDto>(text(name)).toTrip(tripId, language)

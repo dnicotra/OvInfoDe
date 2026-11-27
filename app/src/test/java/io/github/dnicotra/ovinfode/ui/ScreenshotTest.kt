@@ -178,6 +178,23 @@ class ScreenshotTest {
         }
     }
 
+    /** Luxembourg station in French: CFL trains named as in Luxembourg, each cross-border train once, timetable times only. */
+    @Test
+    @Config(qualifiers = "fr-rLU-w400dp-h860dp-xxhdpi")
+    fun departuresLuxembourg() {
+        TimeZone.setDefault(TimeZone.getTimeZone("Europe/Luxembourg"))
+        val fake = FakeTransitous(mapOf("/api/v6/stoptimes" to "stoptimes_luxembourg_gare.json"))
+        val stop = Stop(
+            "fr-horaires-sncf_FR::LMU:c24c10e0-fa0b-11e9-b755-b1228bd14244:", "Luxembourg", 49.5997, 6.1347, "Luxembourg",
+            sortedSetOf(TransportMode.LONG_DISTANCE, TransportMode.REGIONAL, TransportMode.BUS, TransportMode.COACH),
+        )
+        val board = runBlocking { TransitRepository(fake.api).departures(stop, 40) }
+        val now = Instant.parse("2026-11-27T07:30:40Z")
+        capture("departures_luxembourg") {
+            Board(DeparturesUiState(stop, loading = false, departures = board.departures, lastUpdated = now), DepartureViewMode.BY_TIME, now)
+        }
+    }
+
     @Test
     fun homeNearby() {
         val here = LatLon(50.9420, 6.9580)
