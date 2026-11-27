@@ -43,7 +43,7 @@
     <string name="minutes_short">%1$d min</string>
     <string name="cancelled">Soppresso</string>
     <string name="platform_rail">Bin. %1$s</string>
-    <string name="platform_other">Fermata %1$s</string>
+    <string name="platform_other">Ferm. %1$s</string>
     <plurals name="alerts_count">
         <item quantity="one">%1$d avviso</item>
         <item quantity="other">%1$d avvisi</item>
