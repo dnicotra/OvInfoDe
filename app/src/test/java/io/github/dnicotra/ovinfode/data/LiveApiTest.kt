@@ -1,5 +1,6 @@
 package io.github.dnicotra.ovinfode.data
 
+import io.github.dnicotra.ovinfode.country.Belgium
 import io.github.dnicotra.ovinfode.country.Italy
 import io.github.dnicotra.ovinfode.country.Luxembourg
 import io.github.dnicotra.ovinfode.country.Netherlands
@@ -170,6 +171,74 @@ class LiveApiTest {
         assertTrue("too few stops", trip.stops.size >= 2)
         assertTrue("origin stop not found", indexOfStop(trip.stops, departure.stopId, departure.stopName) >= 0)
         assertTrue("no platforms", trip.stops.any { it.platform != null })
+    }
+
+    /** A German reader, for whom Belgian names must not come out bilingual or abbreviated. */
+    private val germanReader = TransitRepository(TransitousApi(userAgent = "Abfahrten-tests/0.1"), userLanguage = { "de" })
+
+    /** What Belgian names must not look like: "Leuven / Louvain", "Brus.-/ Brux-Centr.", "LIEGE Opéra", "… perron 2". */
+    private fun belgianNameProblem(name: String): String? = when {
+        name.isBlank() -> "empty"
+        " / " in name || "/ " in name -> "bilingual"
+        Regex("""\b(?:Brus|Brux)\.""").containsMatchIn(name) -> "abbreviated"
+        Regex("""^[A-ZÀ-Ý'\-]{3,}(?: [A-ZÀ-Ý'\-]{2,})* [A-ZÀ-Ý]?[a-zà-ÿ]""").containsMatchIn(name) -> "town in capitals"
+        Regex("""\bperron \w+$""").containsMatchIn(name) -> "platform in the name"
+        else -> null
+    }
+
+    @Test
+    fun `belgian departure boards read like the signs, for German readers too`() = runBlocking {
+        val problems = mutableListOf<String>()
+        val stations = listOf(
+            "Bruxelles-Central", "Antwerpen-Centraal", "Gent-Sint-Pieters", "Liège-Guillemins", "Charleroi-Central",
+            "Namur", "Brugge", "De Brouckère", "Gent Korenmarkt", "Antwerpen Groenplaats", "Charleroi Gare du Sud",
+        )
+        for (query in stations) {
+            val stop = germanReader.searchStops(query, near = null).firstOrNull()
+            if (stop == null || stop.country() != Belgium) {
+                problems += "$query: found ${stop?.name} (${stop?.id}, ${stop?.country()})"
+                continue
+            }
+            belgianNameProblem(stop.name)?.let { problems += "$query: found '${stop.name}': $it" }
+            val departures = germanReader.departures(stop, count = 30).departures
+            val realtime = if (departures.isEmpty()) 0 else departures.count { it.isRealtime } * 100 / departures.size
+            println(String.format("%-30s %3d departures  %3d%% real-time  %2d platforms  lines %s", stop.name.take(30), departures.size, realtime,
+                departures.count { it.platform != null }, departures.map { it.line.name }.distinct().take(12)))
+            println("    " + departures.map { it.headsign }.distinct().take(12).joinToString(" | "))
+            if (departures.isEmpty()) problems += "${stop.name}: no departures"
+            for (d in departures) {
+                belgianNameProblem(d.headsign)?.let { problems += "${stop.name}: ${d.line.name} → '${d.headsign}': $it" }
+                belgianNameProblem(d.stopName)?.let { problems += "${stop.name}: stop '${d.stopName}': $it" }
+                if (d.tripId.contains("_be-sncb_") && Regex("""^[A-Z]+ \d+$""").matches(d.line.name)) problems += "${stop.name}: train named '${d.line.name}'"
+                if (d.operator == "LETEC") problems += "${stop.name}: operator LETEC"
+            }
+        }
+        assertTrue("no town lookups in Belgium", townLookups.get() == 0)
+        assertTrue(problems.distinct().joinToString("\n"), problems.isEmpty())
+    }
+
+    @Test
+    fun `belgian train trip opens with readable stops`() = runBlocking {
+        val stop = germanReader.searchStops("Brussel-Zuid", near = null).first()
+        val departure = germanReader.departures(stop, count = 40).departures
+            .firstOrNull { it.line.name == "IC" && !it.cancelled }
+        assumeTrue("no Intercity right now", departure != null)
+        departure!!
+        val trip = germanReader.trip(departure.tripId, contextStopId = departure.stopId)
+        println("${trip.line.name} ${trip.tripNumber} → ${trip.headsign} (real-time ${trip.isRealtime}): " +
+            trip.stops.joinToString(" – ") { "${it.name} (${it.platform})" })
+        assertTrue("too few stops", trip.stops.size >= 2)
+        assertTrue("origin stop not found", indexOfStop(trip.stops, departure.stopId, departure.stopName) >= 0)
+        val bad = trip.stops.mapNotNull { s -> belgianNameProblem(s.name)?.let { "${s.name}: $it" } }
+        assertTrue(bad.joinToString("\n"), bad.isEmpty())
+    }
+
+    @Test
+    fun `nearby stops around the Grand-Place in Brussels`() = runBlocking {
+        val nearby = germanReader.nearbyStops(LatLon(50.8467, 4.3525))
+        println("nearby: " + nearby.joinToString { "${it.stop.name} ${it.distanceMeters} m" })
+        assertTrue(nearby.isNotEmpty())
+        assertTrue(nearby.none { belgianNameProblem(it.stop.name) != null })
     }
 
     @Test

@@ -34,7 +34,7 @@ private fun defaultLanguage(): String = Locale.getDefault().language
 private fun PlaceDto.country(): Country = Countries.of(stopId, lat, lon)
 
 /** The place's name, by the rules of the country it lies in and of the feed it comes from. */
-private fun PlaceDto.displayName(): String = country().stopName(name, Countries.ofFeed(stopId))
+private fun PlaceDto.displayName(): String = country().stopName(name, Countries.ofFeed(stopId), stopId)
 
 fun parseInstant(value: String?): Instant? {
     if (value.isNullOrBlank()) return null
@@ -77,7 +77,7 @@ private fun String?.realNameOrNull(): String? = this?.trim()?.takeIf { it.isNotE
 
 fun MatchDto.toStop(): Stop = Stop(
     id = id,
-    name = Countries.of(id, lat, lon).stopName(name, Countries.ofFeed(id)),
+    name = Countries.of(id, lat, lon).stopName(name, Countries.ofFeed(id), id),
     lat = lat,
     lon = lon,
     area = areas.firstOrNull { it.default == true }?.name,
@@ -118,6 +118,17 @@ private fun lineOf(
     return (Countries.ofTrip(tripId) ?: here).line(line, tripId)
 }
 
+/**
+ * The destination of trip [tripId] to show: its [headsign] if there is one, by the rules of the
+ * country of the trip's feed (or else [here]'s), else the name of its final stop [to].
+ */
+private fun destinationName(tripId: String, here: Country, headsign: String?, to: PlaceDto?): String {
+    val feed = Countries.ofTrip(tripId)
+    val finalStop = to?.name?.takeIf { it.isNotBlank() }
+    val raw = headsign?.takeIf { it.isNotBlank() }?.let { (feed ?: here).headsign(it, finalStop) } ?: finalStop ?: ""
+    return (to?.country() ?: here).stopName(raw, feed, to?.stopId)
+}
+
 /** The operator to show, by the rules of the country of the trip's feed (or else [here]'s). */
 private fun operatorOf(tripId: String, here: Country, agencyName: String?): String? =
     agencyName?.trim()?.takeIf { it.isNotEmpty() }?.let { (Countries.ofTrip(tripId) ?: here).operatorName(it) }
@@ -132,12 +143,11 @@ fun StopTimeDto.toDepartureOrNull(): Departure? {
         ?: return null
     val estimated = if (realTime) parseInstant(place.departure) ?: parseInstant(place.arrival) else null
     val here = place.country()
-    val destinationCountry = tripTo?.country() ?: here
     val line = lineOf(tripId, here, mode, displayName, routeShortName, tripShortName, routeColor, routeTextColor)
     return Departure(
         tripId = tripId,
         line = line,
-        headsign = destinationCountry.stopName(headsign?.takeIf { it.isNotBlank() } ?: tripTo?.name ?: "", Countries.ofTrip(tripId)),
+        headsign = destinationName(tripId, here, headsign, tripTo),
         scheduled = scheduled,
         estimated = estimated,
         platform = place.platformOrNull(),
@@ -274,7 +284,7 @@ fun ItineraryDto.toTrip(tripId: String, language: String = defaultLanguage()): T
     return Trip(
         id = tripId,
         line = line,
-        headsign = transitLegs.last().to.country().stopName(first.headsign?.takeIf { it.isNotBlank() } ?: transitLegs.last().to.name, Countries.ofTrip(firstTripId)),
+        headsign = destinationName(firstTripId, origin, first.headsign, transitLegs.last().to),
         operator = operatorOf(firstTripId, origin, first.agencyName),
         tripNumber = tripNumberOf(firstTripId, origin, first.tripShortName, line),
         isRealtime = transitLegs.any { it.realTime },

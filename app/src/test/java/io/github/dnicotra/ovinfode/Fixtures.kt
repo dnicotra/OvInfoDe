@@ -19,6 +19,9 @@ import io.github.dnicotra.ovinfode.data.toTrip
  * The Luxembourg ones (luxembourg, lu_re5113) were recorded at 00:50 local time for the next
  * morning from 08:30 (07:30 UTC), so without real-time data: timetables of the Administration
  * des transports publics, DELFI e.V. and SNCF.
+ * The Belgian ones (bruxelles, antwerpen, liege, be_ic, tec_b2) were recorded on 2026-11-27
+ * for 08:30 local time (07:30 UTC), in the language the app asks for there; data from SNCB,
+ * STIB, De Lijn and TEC (CC BY 4.0).
  */
 object Fixtures {
     fun text(name: String): String = requireNotNull(Fixtures::class.java.getResource("/fixtures/$name")) { "missing fixture $name" }.readText()
@@ -34,13 +37,20 @@ object Fixtures {
         "stoptimes_luxembourg_gare.json", "stoptimes_luxembourg_gare_tram.json", "trip_lu_re5113.json", "mapstops_luxembourg_gare.json",
     )
 
+    /** The Belgian recordings. */
+    val belgian = listOf(
+        "stoptimes_bruxelles_central.json", "stoptimes_bruxelles_de_brouckere.json", "stoptimes_antwerpen_centraal.json",
+        "stoptimes_antwerpen_centraal_station_delijn.json", "stoptimes_liege_guillemins.json",
+        "trip_be_ic.json", "trip_tec_b2.json", "mapstops_bruxelles_centre.json",
+    )
+
     /** Every recorded response except the reverse geocoding answers. */
     val all = listOf(
         "stoptimes_berlin_alexanderplatz.json", "stoptimes_koeln_hbf.json", "stoptimes_heidelberg_hbf.json",
         "trip_s3.json", "trip_ice1697.json", "geocode_alexanderplatz.json", "mapstops_koeln.json",
         "stoptimes_amsterdam_centraal.json", "stoptimes_utrecht_centraal.json", "stoptimes_amsterdam_leidseplein.json",
         "trip_ic2735.json", "trip_iff_ic3531.json", "mapstops_amsterdam_dam.json",
-    ) + italian + luxembourgish
+    ) + italian + luxembourgish + belgian
 
     fun stopTimes(name: String): StopDepartures =
         TransitousApi.json.decodeFromString<StopTimesResponse>(text(name)).toStopDepartures()

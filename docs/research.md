@@ -125,3 +125,30 @@ What the data looks like (recorded responses from 2026-11-26/27: Luxembourg stat
 | Cross-border trains | the same train comes from up to three feeds, named differently and cut off at their borders: RE 5111 is "RE" to Trier in Luxembourg's feed and "RE11" to Wasserbillig in DELFI; the TER to Nancy is 88520 in the SNCF feed and 88521 to Metz-Ville in Luxembourg's (French trains change number by one where they reverse); TGV 2864 to Paris Est is "TGV" 02865 to Metz | shown once (see the README), with the times of a version with real-time data, the furthest destination and the Luxembourg name. Before, 7 of the 40 departures at Luxembourg station on a weekday morning were duplicates |
 
 Luxembourg speaks Luxembourgish, French and German; the app got a French translation, which also serves cross-border commuters from France and Belgium.
+
+## 7. Belgium
+
+*Added November 2026, when the app learned to work in Belgium.*
+
+Belgium has no single national feed, but each of its four public transport operators publishes open data, and Transitous uses all of them ([feed list](https://github.com/public-transport/transitous/blob/main/feeds/be.json)): **SNCB/NMBS** (national trains, timetable and GTFS-RT), **STIB/MIVB** (Brussels metro, tram and bus, timetable only), **De Lijn** (Flanders, timetable, trip updates and alerts) and **TEC** (Wallonia, timetable, trip updates and alerts). So the app needs no new API.
+
+**Real-time.** STIB has none in Transitous. De Lijn's showed up as expected (17 % of the departures at Gent-Sint-Pieters had real-time data around midnight). SNCB's could not be checked: the data was recorded at night, when only a rail replacement bus had real-time data. SNCB's static timetable has no platforms; whether its real-time feed adds them is open.
+
+**Languages.** Names are translated, and the API's `language` parameter picks the translation. Dutch and French give the names on the signs. German and English give SNCB's bilingual short names: the board of Brussels Central is called "Brus.-/ Brux-Centr." in German and "Brux.-/ Brus-Centr." in English, and destinations read "Antwerpen-Centraal / Anvers-Central" (Dutch first in German, French first in English). Without a language everything is French ("Anvers-Central", "Gand-Saint-Pierre"), which is wrong in Flanders. STIB has French and Dutch ("Gare du Midi" / "Zuidstation"), De Lijn only Dutch, TEC mostly French. The geocoder (search) answers with the name that matched, in any language.
+
+So the app asks in the reader's language when that is Dutch or French, and otherwise in the language of the region the place lies in: Dutch in Flanders, French in Wallonia and in Brussels (where most signs show French first). The regions are generated from Natural Earth's Belgian provinces (`BE-VLG`, `BE-BRU`), next to the country outlines. A trip is asked for in the language of the board it was opened from; without one (after the app was restarted) in French.
+
+What the data looked like (recorded on 2026-11-27 for 08:30: Bruxelles-Central, De Brouckère, Antwerpen-Centraal and its De Lijn stop, Liège-Guillemins, an Intercity Genk–Gent, a TEC bus), and what the app does:
+
+| Aspect | Belgian data | What the app does |
+|---|---|---|
+| Stop ids | `be-sncb_S8813003` (stations: "S" + UIC number), `be-stib_6`, `be-delijn_gs:delijn:103734`, `be-tec_gs:tec:L2Tguil2` / `be-tec_tec:s-liegeruelle`; Belgian stations also come from other feeds (`nl-OpenOV_stoparea:17794` Brussel-Centraal, `de-DELFI_000008800007` Antwerpen-Centraal) | the country comes from the outline of Belgium; "gs:" is a GTFS namespace, not a country code, so De Lijn stops just off the coast still count as Belgian. Where the simplified outlines overlap at a border, the feed's country wins |
+| SNCB lines | `displayName` "IC 2003", "L 4978", "P 7445", "EC 9215" (type and train number), S trains "S1"…"S81" with colours; EC trains to the Netherlands are `REGIONAL_RAIL`, a few IC trips `SUBURBAN` | the type is the line (IC, L, P, EC), the number is shown in the trip view; EC is long-distance, IC/L/P are "train" |
+| STIB | headsigns in capitals and abbreviated: "GARE DU MIDI", "DE BROUCKERE", "HOP. MILITAIRE", "WESTLAND SHOP."; the final stop has the proper name ("Hôpital Militaire") | the final stop's name instead of a headsign in capitals |
+| De Lijn | stops named "Town Stop" with the platform: "Antwerpen Centraal Station perron 2", "Antwerpen Roosevelt perron B3" (the platform is also in the data); headsigns as on the vehicles ("Deurne Silsburg" to the stop "Borsbeek Silsburg") | the platform is removed from names, so a station's platforms share one name (and search shows it once) |
+| TEC | the town in capitals, without accents: "LIEGE Gare des Guillemins (Tram)", "CHARLEROI Tirou (M)", "MONT-SUR-MARCHIENNE Place"; 1.3 % of the 15,910 stop names all in capitals ("TOURNAI SNCB"); agency "LETEC"; bus bays A–F as platforms; FlixBus copies the style ("CHARLEROI Gare Centrale") | "Liège, Gare des Guillemins (Tram)": the town written normally, with accents for the localities with the most stops (Liège, Châtelet, La Louvière, Grâce-Hollogne…; a list, since the feed has none), names all in capitals left alone; operator "TEC". Also for TEC's stops abroad ("AACHEN Bushof") |
+| Trip numbers | SNCB train numbers; De Lijn and TEC internal run numbers ("224", "1") | train numbers only |
+| Destinations | stations named after their town, "Town Stop", "TOWN Stop", Brussels places | no town lookups |
+| Foreign destinations | "Rotterdam Centraal (NL)", "Luxembourg (LU)", "Lille Flandres (FR)" | kept, as on SNCB's boards |
+
+**Limits.** On boards outside Belgium the reader's language is used, so in German the SNCB trains at Aachen go to "Luik-Guillemins / Liège-Guillemins" (the German DB trains have their own names). Localities missing from the accent list (small Walloon villages) are written without accents.

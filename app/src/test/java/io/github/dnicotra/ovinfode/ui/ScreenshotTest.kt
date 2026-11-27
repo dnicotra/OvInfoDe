@@ -195,6 +195,23 @@ class ScreenshotTest {
         }
     }
 
+    /** Liège-Guillemins in French: TEC buses with their bays, SNCB trains as IC/S, towns no longer in capitals. */
+    @Test
+    @Config(qualifiers = "fr-rBE-w400dp-h860dp-xxhdpi")
+    fun departuresLiege() {
+        TimeZone.setDefault(TimeZone.getTimeZone("Europe/Brussels"))
+        val fake = FakeTransitous(mapOf("/api/v6/stoptimes" to "stoptimes_liege_guillemins.json"))
+        val stop = Stop(
+            "be-sncb_S8841004", "Liège-Guillemins", 50.6246, 5.5667, "Liège",
+            sortedSetOf(TransportMode.LONG_DISTANCE, TransportMode.REGIONAL, TransportMode.SUBURBAN, TransportMode.BUS),
+        )
+        val board = runBlocking { TransitRepository(fake.api, userLanguage = { "fr" }).departures(stop, 30) }
+        val now = Instant.parse("2026-11-27T07:29:40Z")
+        capture("departures_liege") {
+            Board(DeparturesUiState(stop, loading = false, departures = board.departures, lastUpdated = now), DepartureViewMode.BY_TIME, now)
+        }
+    }
+
     @Test
     fun homeNearby() {
         val here = LatLon(50.9420, 6.9580)
