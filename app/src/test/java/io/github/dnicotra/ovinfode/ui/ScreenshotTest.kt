@@ -212,6 +212,23 @@ class ScreenshotTest {
         }
     }
 
+    /** Paris Gare de Lyon (the Île-de-France stop) in French: RER A and D to their final stops, metro M1 and M14, buses. */
+    @Test
+    @Config(qualifiers = "fr-rFR-w400dp-h860dp-xxhdpi")
+    fun departuresParis() {
+        TimeZone.setDefault(TimeZone.getTimeZone("Europe/Paris"))
+        val fake = FakeTransitous(mapOf("/api/v6/stoptimes" to "stoptimes_paris_gare_de_lyon_idfm.json"))
+        val stop = Stop(
+            "fr-reseau-urbain-et-interurbain-dile-de-france-mobilites_IDFM:73626", "Gare de Lyon", 48.84457, 2.37515, "Paris",
+            sortedSetOf(TransportMode.SUBURBAN, TransportMode.SUBWAY, TransportMode.BUS),
+        )
+        val board = runBlocking { TransitRepository(fake.api, userLanguage = { "fr" }).departures(stop, 30) }
+        val now = Instant.parse("2026-11-27T05:05:20Z")
+        capture("departures_paris") {
+            Board(DeparturesUiState(stop, loading = false, departures = board.departures, lastUpdated = now), DepartureViewMode.BY_TIME, now)
+        }
+    }
+
     @Test
     fun homeNearby() {
         val here = LatLon(50.9420, 6.9580)

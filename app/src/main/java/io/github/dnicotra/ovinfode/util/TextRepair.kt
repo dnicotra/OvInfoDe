@@ -39,9 +39,19 @@ fun repairEncoding(text: String): String {
 
 private val entity = Regex("""&(#\d{1,6}|#x[0-9a-fA-F]{1,5}|amp|quot|apos|lt|gt|nbsp);""")
 
-/** An alert text with [repairEncoding], HTML entities decoded and Unix line breaks. */
+// Île-de-France Mobilités sends alerts as HTML: "<p>Période : …<br><br>Dates : …</p><p>…</p>".
+private val paragraphBreak = Regex("""</p>\s*<p[^>]*>""", RegexOption.IGNORE_CASE)
+private val lineBreak = Regex("""<br\s*/?>""", RegexOption.IGNORE_CASE)
+private val htmlTag = Regex("""</?(?:p|div|span|b|i|u|em|strong|a|ul|ol|li|font|small)(?:\s[^>]*)?>""", RegexOption.IGNORE_CASE)
+private val listItem = Regex("""<li[^>]*>""", RegexOption.IGNORE_CASE)
+
+/** An alert text with [repairEncoding], HTML markup and entities decoded and Unix line breaks. */
 fun cleanAlertText(text: String): String {
     var result = repairEncoding(text).replace("\r\n", "\n").replace('\r', '\n')
+    if ('<' in result) {
+        result = result.replace(paragraphBreak, "\n\n").replace(lineBreak, "\n").replace(listItem, "\n• ").replace(htmlTag, "")
+        result = result.replace(Regex("""\n{3,}"""), "\n\n")
+    }
     if ('&' in result) {
         result = entity.replace(result) { m ->
             when (val name = m.groupValues[1]) {

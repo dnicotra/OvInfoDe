@@ -21,7 +21,7 @@ class CountriesTest {
         assertSame(Germany, of("at-Railway-Current-Reference-Data-2026_de:09776:1546:1:1", 47.54539, 9.68079))
         assertSame(Netherlands, of("de-DELFI_nl:9:18124", 52.22256, 6.89023)) // Enschede in the German feed
         assertSame(Netherlands, of("nl-OpenOV_NL:S:30009577", 52.3723, 4.8925)) // Amsterdam, Rokin
-        assertSame(OtherCountry, of("de-DELFI_fr:24067:1284", 48.58534, 7.73407)) // Strasbourg
+        assertSame(France, of("de-DELFI_fr:24067:1284", 48.58534, 7.73407)) // Strasbourg
         // A prefix that is no known country code says nothing: Baarle-Nassau in the Belgian De Lijn feed.
         assertSame(Netherlands, of("be-delijn_gs:delijn:108024", 51.44177, 4.90492))
         // Even with a misleading position.
@@ -50,6 +50,23 @@ class CountriesTest {
     }
 
     @Test
+    fun `french stops in all their feeds`() {
+        assertSame(France, of("fr-reseau-urbain-et-interurbain-dile-de-france-mobilites_IDFM:73626", 48.84457, 2.37515)) // Paris, Gare de Lyon
+        assertSame(France, of("ch-opentransportdataswiss26_Parent8768600", 48.84484, 2.37407)) // the same, Swiss feed
+        assertSame(France, of("be-sncb_8728600", 50.63333, 3.066667)) // Lille Flandres
+        assertSame(France, of("fr-horaires-sncf_FR::LMU:7429fb60-cb0a-11e8-8bfa-f784c1c7c611:", 43.611206, 1.453616)) // Toulouse Matabiau
+        assertSame(France, of("fr-donnees-statiques-et-dynamiques-du-reseau-de-transport-lignes-dazur_123", 43.6966, 7.2711)) // Nice
+        assertSame(France, of(null, 42.3063, 9.1500)) // Corte, Corsica
+        // Luxembourg's ids say "France" for Volmerange-les-Mines, a kilometre from the border.
+        assertSame(France, of("lu-administration-des-transports-publics_000400000034", 49.4446, 6.0806))
+        // Neighbours stay what they are.
+        assertSame(Belgium, of("fr-horaires-sncf_FR::LMO:c2464480-fa0b-11e8-8bfa-f784c1c7c611:", 50.8357, 4.3360)) // Bruxelles-Midi
+        assertSame(OtherCountry, of("fr-horaires-sncf_FR::LMO:70e98500-3a69-11e8-8bfa-f784c1c7c611:", 46.2102, 6.1424)) // Genève
+        assertSame(OtherCountry, of(null, 43.7384, 7.4246)) // Monaco
+        assertSame(Germany, of("fr-horaires-sncf_FR::LMO:71df2fa0-3a69-11e8-8bfa-f784c1c7c611:", 48.4764, 7.9466)) // Offenburg
+    }
+
+    @Test
     fun `luxembourg stops go by their id, also right on the border rivers`() {
         val atp = "lu-administration-des-transports-publics_"
         // Towns on the Our, Sûre and Moselle, which the simplified outlines put in Germany.
@@ -63,7 +80,7 @@ class CountriesTest {
         assertSame(Germany, of(atp + "000500000019", 49.707375, 6.550666)) // Igel
         assertSame(Germany, of(atp + "000500000075", 49.689728, 6.46192)) // Temmels, across the Moselle
         assertSame(Belgium, of(atp + "000300000017", 49.563934, 5.82912)) // Athus, Gare
-        assertSame(OtherCountry, of(atp + "000400000106", 49.456738, 6.07897)) // Volmerange-les-Mines, Gare
+        assertSame(France, of(atp + "000400000106", 49.456738, 6.07897)) // Volmerange-les-Mines, Gare
         // Luxembourg stations in the German feed have "lu:" ids, in the French and Belgian ones none.
         assertSame(Luxembourg, of("de-DELFI_lu:25000:NVBW_003", 49.59981, 6.13413))
         assertSame(Luxembourg, of("fr-horaires-sncf_FR::LMU:c24c10e0-fa0b-11e9-b755-b1228bd14244:", 49.5997, 6.1347))
@@ -78,7 +95,7 @@ class CountriesTest {
         assertSame(Netherlands, of("nl-OpenOV_4262468", 53.46864, 6.20321))
         // Not for feeds of other countries, and not far away.
         assertSame(OtherCountry, of("eu-flixbus_x", 51.44413, 3.59557))
-        assertSame(OtherCountry, of("nl-OpenOV_x", 50.6366, 3.0705)) // Lille
+        assertSame(France, of("nl-OpenOV_x", 50.6366, 3.0705)) // Lille
         // De Lijn's "gs:delijn:" ids carry no country code, so the feed counts: the end of Blankenberge pier.
         assertSame(Belgium, of("be-delijn_gs:delijn:x", 51.3290, 3.1300))
     }
@@ -105,7 +122,7 @@ class CountriesTest {
         assertSame(Italy, of(null, 43.9360, 12.4470))
         // Neighbours.
         assertSame(OtherCountry, of("it-trenitalia_x", 47.3780, 8.5400)) // Zürich HB
-        assertSame(OtherCountry, of(null, 43.7046, 7.2619)) // Nice
+        assertSame(France, of(null, 43.7046, 7.2619)) // Nice
         assertSame(OtherCountry, of(null, 46.0050, 8.9470)) // Lugano
         assertSame(OtherCountry, of(null, 47.2630, 11.4010)) // Innsbruck
         assertSame(OtherCountry, of(null, 35.8970, 14.5130)) // Valletta
@@ -130,7 +147,8 @@ class CountriesTest {
         assertSame(Germany, Countries.ofTrip("20261126_07:03_de-DELFI_3490184955"))
         assertSame(Belgium, Countries.ofTrip("20261127_07:06_be-sncb_88____:007::8831765:8892007:19:947:20261211"))
         assertSame(Belgium, Countries.ofTrip("20261127_07:19_be-tec_gt:tec:55536802-L_PA_2026-26_LG_N3-Sem-N-3-11"))
-        assertNull(Countries.ofTrip("20261127_05:15_fr-eurostar-gtfs-plan-de-transport-et-temps-reel_9414"))
+        assertSame(France, Countries.ofTrip("20261127_05:15_fr-eurostar-gtfs-plan-de-transport-et-temps-reel_9414"))
+        assertNull(Countries.ofTrip("20261127_05:15_ch-opentransportdataswiss26_9414"))
         assertNull(Countries.ofTrip("eu-flixbus_123"))
         assertNull(Countries.ofTrip(null))
     }
@@ -163,7 +181,7 @@ class CountriesTest {
         // Stations abroad in the SNCB feed.
         assertSame(Netherlands, of("be-sncb_8400530", 51.92485, 4.46931)) // Rotterdam Centraal
         assertSame(Netherlands, of("be-sncb_8400526", 51.54083, 4.45869)) // Roosendaal
-        assertSame(OtherCountry, of("be-sncb_8728600", 50.63333, 3.06667)) // Lille Flandres
+        assertSame(France, of("be-sncb_8728600", 50.63333, 3.06667)) // Lille Flandres
         // At the Dutch border.
         assertSame(Belgium, of("be-sncb_S8821402", 51.46277, 4.45132)) // Essen
         assertSame(Netherlands, of("nl-OpenOV_stoparea:17963", 51.54031, 4.45902)) // Roosendaal
@@ -176,7 +194,8 @@ class CountriesTest {
         assertSame(Italy, Countries.byCode("IT"))
         assertSame(Luxembourg, Countries.byCode("LU"))
         assertSame(Belgium, Countries.byCode("be"))
-        assertNull(Countries.byCode("fr"))
+        assertSame(France, Countries.byCode("FR"))
+        assertNull(Countries.byCode("ch"))
         assertNull(Countries.byCode(null))
     }
 }
