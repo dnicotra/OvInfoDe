@@ -158,6 +158,7 @@ fun StopTimeDto.toDepartureOrNull(): Departure? {
         stopName = place.displayName(),
         tripNumber = tripNumberOf(tripId, here, tripShortName, line),
         destination = tripTo?.let { NamedPlace(it.stopId, it.displayName(), it.lat, it.lon) },
+        stopLocation = LatLon(place.lat, place.lon).takeIf { place.lat != 0.0 || place.lon != 0.0 },
     )
 }
 

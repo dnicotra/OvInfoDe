@@ -8,6 +8,7 @@ import io.github.dnicotra.ovinfode.data.DepartureViewMode
 import io.github.dnicotra.ovinfode.data.model.Alert
 import io.github.dnicotra.ovinfode.data.model.Departure
 import io.github.dnicotra.ovinfode.data.model.ErrorKind
+import io.github.dnicotra.ovinfode.data.model.NearbyStop
 import io.github.dnicotra.ovinfode.data.model.Stop
 import io.github.dnicotra.ovinfode.data.model.TransportMode
 import io.github.dnicotra.ovinfode.data.mergeSameTrains
@@ -42,6 +43,8 @@ data class DeparturesUiState(
     val loadingMore: Boolean = false,
     val filter: TransportMode? = null,
     val lastUpdated: Instant? = null,
+    /** Other stops of the same place (see [io.github.dnicotra.ovinfode.data.TransitRepository.similarStops]). */
+    val similarStops: List<NearbyStop> = emptyList(),
 ) {
     val availableModes: List<TransportMode> get() = departures.map { it.line.mode }.distinct().sorted()
     val visibleDepartures: List<Departure>
@@ -78,6 +81,9 @@ class DeparturesViewModel(
 
     init {
         load(userInitiated = false)
+        viewModelScope.launch {
+            safeCall { repository.similarStops(stop) }.onSuccess { similar -> _state.update { it.copy(similarStops = similar) } }
+        }
     }
 
     fun refresh() = load(userInitiated = true)

@@ -105,4 +105,16 @@
     <string name="about_legend_ontime">Green: on time (real-time data)</string>
     <string name="about_legend_delayed">Red: delayed, cancelled or platform changed</string>
     <string name="about_legend_schedule">Neutral: timetable only, no real-time data</string>
+    <!-- Stop map and stops of the same place -->
+    <string name="stop_on_map">Show on map</string>
+    <string name="similar_stops">Also here</string>
+    <string name="similar_stop_chip">%1$s · %2$d m</string>
+    <string name="directions">Directions</string>
+    <string name="map_platforms">Platforms and stops</string>
+    <string name="map_platform_lines">Lines: %1$s</string>
+    <string name="map_whole_stop">Whole stop</string>
+    <string name="map_no_platforms">The timetable does not say where the platforms are.</string>
+    <string name="map_attribution">Map © OpenStreetMap contributors</string>
+    <string name="no_map_app">No app for directions found</string>
+    <string name="map_other_stop">Also here: %1$s</string>
 </resources>

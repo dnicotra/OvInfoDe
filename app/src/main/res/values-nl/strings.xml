@@ -104,4 +104,16 @@
     <string name="about_legend_ontime">Groen: op tijd (actuele gegevens)</string>
     <string name="about_legend_delayed">Rood: vertraagd, rijdt niet of spoorwijziging</string>
     <string name="about_legend_schedule">Neutraal: alleen dienstregeling, geen actuele gegevens</string>
+    <!-- Stop map and stops of the same place -->
+    <string name="stop_on_map">Op de kaart tonen</string>
+    <string name="similar_stops">Ook hier</string>
+    <string name="similar_stop_chip">%1$s · %2$d m</string>
+    <string name="directions">Route</string>
+    <string name="map_platforms">Sporen en perrons</string>
+    <string name="map_platform_lines">Lijnen: %1$s</string>
+    <string name="map_whole_stop">Hele halte</string>
+    <string name="map_no_platforms">De dienstregeling zegt niet waar de perrons liggen.</string>
+    <string name="map_attribution">Kaart © OpenStreetMap-bijdragers</string>
+    <string name="no_map_app">Geen app voor routes gevonden</string>
+    <string name="map_other_stop">Ook hier: %1$s</string>
 </resources>

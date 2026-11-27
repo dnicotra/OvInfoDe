@@ -11,7 +11,8 @@ A simple Android app for public transport in Germany, the Netherlands, Belgium, 
 <img src="docs/screenshots/departures_roma.png" width="200" alt="Departure board of Roma Termini, in Italian">
 <img src="docs/screenshots/departures_luxembourg.png" width="200" alt="Departure board of Luxembourg station, in French">
 <img src="docs/screenshots/departures_liege.png" width="200" alt="Departure board of Liège-Guillemins, in French">
-<img src="docs/screenshots/departures_paris.png" width="200" alt="Departure board of Paris Gare de Lyon, in French">
+<img src="docs/screenshots/departures_paris.png" width="200" alt="Departure board of Paris Gare de Lyon, in French, with the SNCF station next to it">
+<img src="docs/screenshots/stop_map.png" width="200" alt="Berlin Alexanderplatz on the map, platform by platform">
 </p>
 
 ## Features
@@ -19,6 +20,8 @@ A simple Android app for public transport in Germany, the Netherlands, Belgium, 
 - **Nearby**: the closest stops with their next departures, based on your location.
 - **Favourites**: star a stop; the home screen shows its next departures.
 - **Departure board** per stop: countdown, platform/stop, real-time delay (green on time, red delayed), cancellations, platform changes and service alerts. Sort **by time** or **by line**, filter by mode (ICE/IC, regional, S-Bahn, U-Bahn, tram, bus…), load later departures. Refreshes every 30 s.
+- **Map of a stop**: where the stop is, and where exactly each platform or bay is when the timetable says so (German stations do, platform by platform: at Alexanderplatz the U2, U5 and U8 platforms lie up to 200 m apart), with the lines leaving from each. "Directions" hands the stop or the chosen platform to a maps or navigation app. Map tiles from OpenStreetMap (osmdroid, no Google services).
+- **Stops of the same place**: timetables often split one place into several stops: "Gare de Lyon" (metro, RER, buses) and "Paris Gare de Lyon" (SNCF) in Paris, the station and the TCL stops at Lyon Part-Dieu, the station and the bus and tram stops at Alexanderplatz. A board lists the stops with a similar name within 400 m under "Also here"; one tap switches to their board.
 - **Trip view**: all stops of a trip with real-time times and where the vehicle is right now.
 - **Stop search** across Germany, the Netherlands, Belgium, France, Italy and Luxembourg (and the rest of Europe covered by Transitous).
 - **Local conventions per country**: German stop names shortened the DB way ("Köln Hbf"), Dutch trains as IC/SPR in NS colours, Italian names in the usual spelling instead of capitals ("ROMA TERMINI" → "Roma Termini"), Milan's metro as M1–M5 and Rome's as A/B/C, "U-Bahn" in Germany and "metro" elsewhere, GVB's bilingual alerts in one language, cross-border trains at Luxembourg station shown once under their CFL names, Belgian names in the language of the signs (Dutch in Flanders, French in Wallonia and Brussels) unless you read Dutch or French, SNCB trains as IC/L/P/S, TEC's "LIEGE Opéra" as "Liège, Opéra", French trains as TGV/OUIGO/IC/TER with their number in the trip view, Paris as RER A and M1, RER missions to their final stop. See [Countries](#countries).
@@ -30,7 +33,7 @@ Timetables and real-time data come from **[Transitous](https://transitous.org)**
 
 **Luxembourg has no real-time data in Transitous**: Luxembourg publishes it only through the mobiliteit.lu API, which needs a personal key. Boards there show timetable times (in neutral colours) and say so; only trains that a German, French or Belgian feed also carries can bring real-time data.
 
-Transitous is free for **open-source, non-commercial** apps. The app follows its [usage policy](https://transitous.org/api/): it identifies itself with a User-Agent containing the repository URL, credits the [data sources](https://transitous.org/sources/) and OpenStreetMap, and keeps the request rate low.
+Transitous is free for **open-source, non-commercial** apps. The app follows its [usage policy](https://transitous.org/api/): it identifies itself with a User-Agent containing the repository URL, credits the [data sources](https://transitous.org/sources/) and OpenStreetMap, and keeps the request rate low. The stop map loads its tiles from OpenStreetMap's tile servers with the same User-Agent, follows their [tile usage policy](https://operations.osmfoundation.org/policies/tiles/) (attribution on the map, tiles cached on the device) and is only shown on request.
 
 ## Install
 
@@ -56,8 +59,8 @@ app/src/main/java/io/github/dnicotra/ovinfode/
 ├── data/api/        Transitous client (OkHttp + kotlinx.serialization) and DTOs
 ├── data/            Mapping to app models, repository, favourites (DataStore), location
 ├── country/         Per-country conventions (Germany, Netherlands, Belgium, France, Italy, Luxembourg) and border outlines
-├── util/            Countdown, line grouping, vehicle position, distances, stop names (German, Italian, French)
-└── ui/              Jetpack Compose screens: home, search, departures, trip, about
+├── util/            Countdown, line grouping, vehicle position, distances, stop names (German, Italian, French), platforms, similar stops
+└── ui/              Jetpack Compose screens: home, search, departures, stop map, trip, about
 ```
 
 ## Countries
@@ -89,7 +92,7 @@ A train that crosses a border is in the timetable of every country it runs in, e
 
 To add a country: create an object like `Netherlands` or `Italy`, list it in `Countries.all`, regenerate the outlines with `python3 tools/country_outlines.py NL DE IT LU BE BE-VLG BE-BRU FR XX > app/src/main/java/io/github/dnicotra/ovinfode/country/CountryOutlines.kt`, add a `values-xx/strings.xml` if it speaks a new language, and record a departure board as a test fixture.
 
-Kotlin, Jetpack Compose (Material 3), Navigation Compose, no Google Play services (location uses the platform `LocationManager`).
+Kotlin, Jetpack Compose (Material 3), Navigation Compose, osmdroid for the map, no Google Play services (location uses the platform `LocationManager`).
 
 ## License
 

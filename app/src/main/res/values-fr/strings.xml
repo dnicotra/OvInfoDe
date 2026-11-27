@@ -105,4 +105,16 @@
     <string name="about_legend_ontime">Vert : à l’heure (données en temps réel)</string>
     <string name="about_legend_delayed">Rouge : en retard, supprimé ou changement de voie</string>
     <string name="about_legend_schedule">Neutre : horaires théoriques, sans temps réel</string>
+    <!-- Stop map and stops of the same place -->
+    <string name="stop_on_map">Afficher sur la carte</string>
+    <string name="similar_stops">Aussi ici</string>
+    <string name="similar_stop_chip">%1$s · %2$d m</string>
+    <string name="directions">Itinéraire</string>
+    <string name="map_platforms">Voies et quais</string>
+    <string name="map_platform_lines">Lignes : %1$s</string>
+    <string name="map_whole_stop">Tout l’arrêt</string>
+    <string name="map_no_platforms">Les horaires n’indiquent pas où se trouvent les quais.</string>
+    <string name="map_attribution">Carte © les contributeurs d’OpenStreetMap</string>
+    <string name="no_map_app">Aucune application d’itinéraire trouvée</string>
+    <string name="map_other_stop">Aussi ici : %1$s</string>
 </resources>

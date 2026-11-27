@@ -104,4 +104,16 @@
     <string name="about_legend_ontime">Grün: pünktlich (Echtzeitdaten)</string>
     <string name="about_legend_delayed">Rot: verspätet, Ausfall oder Gleiswechsel</string>
     <string name="about_legend_schedule">Neutral: nur Fahrplan, keine Echtzeitdaten</string>
+    <!-- Stop map and stops of the same place -->
+    <string name="stop_on_map">Auf der Karte zeigen</string>
+    <string name="similar_stops">Auch hier</string>
+    <string name="similar_stop_chip">%1$s · %2$d m</string>
+    <string name="directions">Route</string>
+    <string name="map_platforms">Gleise und Steige</string>
+    <string name="map_platform_lines">Linien: %1$s</string>
+    <string name="map_whole_stop">Ganze Haltestelle</string>
+    <string name="map_no_platforms">Der Fahrplan sagt nicht, wo die Gleise liegen.</string>
+    <string name="map_attribution">Karte © OpenStreetMap-Mitwirkende</string>
+    <string name="no_map_app">Keine App für Routen gefunden</string>
+    <string name="map_other_stop">Auch hier: %1$s</string>
 </resources>

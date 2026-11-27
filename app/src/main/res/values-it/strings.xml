@@ -104,4 +104,16 @@
     <string name="about_legend_ontime">Verde: in orario (dati in tempo reale)</string>
     <string name="about_legend_delayed">Rosso: in ritardo, soppresso o cambio binario</string>
     <string name="about_legend_schedule">Neutro: solo orario, nessun dato in tempo reale</string>
+    <!-- Stop map and stops of the same place -->
+    <string name="stop_on_map">Mostra sulla mappa</string>
+    <string name="similar_stops">Anche qui</string>
+    <string name="similar_stop_chip">%1$s · %2$d m</string>
+    <string name="directions">Percorso</string>
+    <string name="map_platforms">Binari e fermate</string>
+    <string name="map_platform_lines">Linee: %1$s</string>
+    <string name="map_whole_stop">Tutta la fermata</string>
+    <string name="map_no_platforms">L\'orario non indica dove si trovano i binari.</string>
+    <string name="map_attribution">Mappa © contributori di OpenStreetMap</string>
+    <string name="no_map_app">Nessuna app per i percorsi trovata</string>
+    <string name="map_other_stop">Anche qui: %1$s</string>
 </resources>
