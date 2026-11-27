@@ -250,6 +250,8 @@ class ScreenshotTest {
         )
         val state = StopMapUiState(stop, loading = false, platforms = places, similarStops = similar, selected = MapTarget.Platform(places.first()))
         capture("stop_map") { StopMapContent(state, {}, {}, {}) }
+        // The map stays light in dark mode: its labels must not take the dark theme's pale colours.
+        capture("stop_map_dark", dark = true) { StopMapContent(state, {}, {}, {}) }
     }
 
     @Test

@@ -52,7 +52,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
@@ -230,8 +229,6 @@ private const val MAX_LINES = 8
 private fun StopMap(state: StopMapUiState, onSelect: (MapTarget) -> Unit) {
     val context = LocalContext.current
     val lifecycle = LocalLifecycleOwner.current.lifecycle
-    val primary = MaterialTheme.colorScheme.primary.toArgb()
-    val secondary = MaterialTheme.colorScheme.tertiary.toArgb()
     val labels = state.targets.associateWith { markerLabel(it) }
     val mapView = remember {
         MapView(context).apply {
@@ -273,7 +270,8 @@ private fun StopMap(state: StopMapUiState, onSelect: (MapTarget) -> Unit) {
                     when (target) {
                         is MapTarget.WholeStop -> setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                         else -> {
-                            icon = labelIcon(map.context, labels[target].orEmpty(), if (target is MapTarget.OtherStop) secondary else primary, isSelected)
+                            val (background, text) = labelColors(target)
+                            icon = labelIcon(map.context, labels[target].orEmpty(), background, text, isSelected)
                             setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                         }
                     }
@@ -300,26 +298,57 @@ private fun markerLabel(target: MapTarget): String = when (target) {
     is MapTarget.OtherStop -> target.nearby.stop.name.let { if (it.length > 18) it.take(17) + "…" else it }
 }
 
-/** A rounded label in [color], larger and outlined when [selected]. */
-private fun labelIcon(context: Context, text: String, color: Int, selected: Boolean): BitmapDrawable {
+// Marker colours do not follow the app's theme: the map underneath is always light.
+private const val PLATFORM_LABEL = 0xFF1F3A5F.toInt()
+private const val OTHER_STOP_LABEL = 0xFF4A4A4A.toInt()
+private const val WHITE = 0xFFFFFFFF.toInt()
+private const val BLACK = 0xFF000000.toInt()
+
+/**
+ * Background and text colour of a marker: a platform in the colour of its main line, as on
+ * the line badges, where the feed has one; otherwise dark blue, other stops dark grey.
+ */
+internal fun labelColors(target: MapTarget): Pair<Int, Int> {
+    if (target is MapTarget.Platform) {
+        val line = target.place.lines.firstOrNull { it.color != null }
+        val background = line?.color
+        if (background != null) return background to (line.textColor ?: readableTextOn(background))
+        return PLATFORM_LABEL to WHITE
+    }
+    return OTHER_STOP_LABEL to WHITE
+}
+
+/** White or black, whichever reads better on [background] (relative luminance, WCAG). */
+internal fun readableTextOn(background: Int): Int {
+    fun channel(shift: Int): Double {
+        val c = ((background shr shift) and 0xFF) / 255.0
+        return if (c <= 0.03928) c / 12.92 else Math.pow((c + 0.055) / 1.055, 2.4)
+    }
+    val luminance = 0.2126 * channel(16) + 0.7152 * channel(8) + 0.0722 * channel(0)
+    // Contrast with white (1.05 / (L + 0.05)) against contrast with black ((L + 0.05) / 0.05).
+    return if (1.05 / (luminance + 0.05) >= (luminance + 0.05) / 0.05) WHITE else BLACK
+}
+
+/** A rounded label with [text] in [textColor] on [background], larger and outlined when [selected]. */
+private fun labelIcon(context: Context, text: String, background: Int, textColor: Int, selected: Boolean): BitmapDrawable {
     val density = context.resources.displayMetrics.density
     val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         textSize = (if (selected) 15 else 13) * density
         typeface = Typeface.DEFAULT_BOLD
-        this.color = android.graphics.Color.WHITE
+        color = textColor
     }
     val padH = 8 * density
     val padV = 5 * density
-    val border = if (selected) 3 * density else 0f
+    // A thin outline keeps light labels apart from the map; the selected one gets a thick one.
+    val border = (if (selected) 3 else 1) * density
     val width = paint.measureText(text) + 2 * padH + 2 * border
     val height = paint.fontMetrics.let { it.descent - it.ascent } + 2 * padV + 2 * border
     val bitmap = Bitmap.createBitmap(width.toInt().coerceAtLeast(1), height.toInt().coerceAtLeast(1), Bitmap.Config.ARGB_8888)
     val canvas = Canvas(bitmap)
     val radius = 8 * density
-    if (selected) {
-        canvas.drawRoundRect(RectF(0f, 0f, width, height), radius, radius, Paint(Paint.ANTI_ALIAS_FLAG).apply { this.color = android.graphics.Color.WHITE })
-    }
-    canvas.drawRoundRect(RectF(border, border, width - border, height - border), radius, radius, Paint(Paint.ANTI_ALIAS_FLAG).apply { this.color = color })
+    val outline = if (selected) WHITE else 0x99000000.toInt()
+    canvas.drawRoundRect(RectF(0f, 0f, width, height), radius, radius, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = outline })
+    canvas.drawRoundRect(RectF(border, border, width - border, height - border), radius, radius, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = background })
     canvas.drawText(text, border + padH, border + padV - paint.fontMetrics.ascent, paint)
     return BitmapDrawable(context.resources, bitmap)
 }
