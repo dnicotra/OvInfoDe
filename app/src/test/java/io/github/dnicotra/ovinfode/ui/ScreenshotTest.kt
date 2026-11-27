@@ -12,7 +12,12 @@ import io.github.dnicotra.ovinfode.data.api.PlaceDto
 import io.github.dnicotra.ovinfode.data.api.TransitousApi
 import io.github.dnicotra.ovinfode.data.model.Alert
 import io.github.dnicotra.ovinfode.data.model.LatLon
+import io.github.dnicotra.ovinfode.data.model.NearbyStop
 import io.github.dnicotra.ovinfode.data.model.Stop
+import io.github.dnicotra.ovinfode.ui.map.MapTarget
+import io.github.dnicotra.ovinfode.ui.map.StopMapContent
+import io.github.dnicotra.ovinfode.ui.map.StopMapUiState
+import io.github.dnicotra.ovinfode.util.platformPlaces
 import io.github.dnicotra.ovinfode.data.model.TransportMode
 import io.github.dnicotra.ovinfode.data.toStop
 import io.github.dnicotra.ovinfode.ui.departures.DeparturesContent
@@ -210,6 +215,41 @@ class ScreenshotTest {
         capture("departures_liege") {
             Board(DeparturesUiState(stop, loading = false, departures = board.departures, lastUpdated = now), DepartureViewMode.BY_TIME, now)
         }
+    }
+
+    /** Paris Gare de Lyon (the Île-de-France stop) in French: RER A and D to their final stops, metro M1 and M14, buses. */
+    @Test
+    @Config(qualifiers = "fr-rFR-w400dp-h860dp-xxhdpi")
+    fun departuresParis() {
+        TimeZone.setDefault(TimeZone.getTimeZone("Europe/Paris"))
+        val fake = FakeTransitous(mapOf("/api/v6/stoptimes" to "stoptimes_paris_gare_de_lyon_idfm.json"))
+        val stop = Stop(
+            "fr-reseau-urbain-et-interurbain-dile-de-france-mobilites_IDFM:73626", "Gare de Lyon", 48.84457, 2.37515, "Paris",
+            sortedSetOf(TransportMode.SUBURBAN, TransportMode.SUBWAY, TransportMode.BUS),
+        )
+        val board = runBlocking { TransitRepository(fake.api, userLanguage = { "fr" }).departures(stop, 30) }
+        val now = Instant.parse("2026-11-27T05:05:20Z")
+        val sncf = Stop(
+            "fr-horaires-sncf_FR::LMU:6451bcf0-cb0a-11e8-8bfa-f784c1c7c611:", "Paris Gare de Lyon", 48.844945, 2.373481, null,
+            sortedSetOf(TransportMode.LONG_DISTANCE, TransportMode.REGIONAL),
+        )
+        val similar = listOf(NearbyStop(sncf, 149))
+        capture("departures_paris") {
+            Board(DeparturesUiState(stop, loading = false, departures = board.departures, lastUpdated = now, similarStops = similar), DepartureViewMode.BY_TIME, now)
+        }
+    }
+
+    /** Berlin Alexanderplatz on the map: every U-Bahn platform at its place, and the stops of the same place. */
+    @Test
+    fun stopMap() {
+        val stop = Stop("de-DELFI_de:11000:900100003", "S+U Alexanderplatz Bhf (Berlin)", 52.52151, 13.411267)
+        val places = platformPlaces(Fixtures.berlin.departures)
+        val similar = listOf(
+            NearbyStop(Stop("de-VBB_de:11000:900100005::1", "U Alexanderplatz (Berlin) [Tram]", 52.5228, 13.4128, null, sortedSetOf(TransportMode.TRAM)), 160),
+            NearbyStop(Stop("de-VBB_de:11000:900100031", "S+U Alexanderplatz Bhf/Memhardstr. (Berlin)", 52.5232, 13.4105, null, sortedSetOf(TransportMode.BUS)), 190),
+        )
+        val state = StopMapUiState(stop, loading = false, platforms = places, similarStops = similar, selected = MapTarget.Platform(places.first()))
+        capture("stop_map") { StopMapContent(state, {}, {}, {}) }
     }
 
     @Test

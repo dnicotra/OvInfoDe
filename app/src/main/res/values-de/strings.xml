@@ -88,10 +88,10 @@
 
     <!-- Attribution / about -->
     <string name="attribution">Daten: Transitous · © OpenStreetMap-Mitwirkende</string>
-    <string name="about_description">Live-Abfahrten für Bus, Tram, U-Bahn, S-Bahn und Zug in Deutschland, den Niederlanden, Belgien, Italien und Luxemburg (und darüber hinaus): Haltestellen in der Nähe, Favoriten, Verspätungen und Ausfälle auf einen Blick.</string>
+    <string name="about_description">Live-Abfahrten für Bus, Tram, U-Bahn, S-Bahn und Zug in Deutschland, den Niederlanden, Belgien, Frankreich, Italien und Luxemburg (und darüber hinaus): Haltestellen in der Nähe, Favoriten, Verspätungen und Ausfälle auf einen Blick.</string>
     <string name="about_version">Version %1$s</string>
     <string name="about_data_title">Datenquellen</string>
-    <string name="about_data_text">Fahrplan- und Echtzeitdaten stammen von Transitous, einem freien, ehrenamtlich betriebenen ÖPNV-Dienst. Für Deutschland nutzt Transitous die bundesweiten DELFI-Soll- und Echtzeitdaten, für die Niederlande die von OpenOV, für Belgien die von SNCB, STIB, De Lijn und TEC, für Italien die von Trenitalia, Trenord und den Regional- und Stadtverkehrsbetrieben (viele über BusOne), für Luxemburg den landesweiten Fahrplan der Administration des transports publics (ohne Echtzeitdaten). Haltestellen und Karten basieren auf OpenStreetMap.</string>
+    <string name="about_data_text">Fahrplan- und Echtzeitdaten stammen von Transitous, einem freien, ehrenamtlich betriebenen ÖPNV-Dienst. Für Deutschland nutzt Transitous die bundesweiten DELFI-Soll- und Echtzeitdaten, für die Niederlande die von OpenOV, für Belgien die von SNCB, STIB, De Lijn und TEC, für Frankreich die von SNCF, Île-de-France Mobilités und den Regional- und Stadtverkehrsbetrieben, für Italien die von Trenitalia, Trenord und den Regional- und Stadtverkehrsbetrieben (viele über BusOne), für Luxemburg den landesweiten Fahrplan der Administration des transports publics (ohne Echtzeitdaten). Haltestellen und Karten basieren auf OpenStreetMap.</string>
     <string name="about_link_sources">Datenquellen und Lizenzen von Transitous</string>
     <string name="about_link_osm">OpenStreetMap-Urheberrecht</string>
     <string name="about_link_donate">Transitous mit einer Spende unterstützen</string>
@@ -104,4 +104,16 @@
     <string name="about_legend_ontime">Grün: pünktlich (Echtzeitdaten)</string>
     <string name="about_legend_delayed">Rot: verspätet, Ausfall oder Gleiswechsel</string>
     <string name="about_legend_schedule">Neutral: nur Fahrplan, keine Echtzeitdaten</string>
+    <!-- Stop map and stops of the same place -->
+    <string name="stop_on_map">Auf der Karte zeigen</string>
+    <string name="similar_stops">Auch hier</string>
+    <string name="similar_stop_chip">%1$s · %2$d m</string>
+    <string name="directions">Route</string>
+    <string name="map_platforms">Gleise und Steige</string>
+    <string name="map_platform_lines">Linien: %1$s</string>
+    <string name="map_whole_stop">Ganze Haltestelle</string>
+    <string name="map_no_platforms">Der Fahrplan sagt nicht, wo die Gleise liegen.</string>
+    <string name="map_attribution">Karte © OpenStreetMap-Mitwirkende</string>
+    <string name="no_map_app">Keine App für Routen gefunden</string>
+    <string name="map_other_stop">Auch hier: %1$s</string>
 </resources>

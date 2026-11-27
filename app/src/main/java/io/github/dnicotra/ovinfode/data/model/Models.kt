@@ -78,6 +78,8 @@ data class Departure(
     val tripNumber: String?,
     /** Final stop of the trip; [headsign] is usually its name. */
     val destination: NamedPlace? = null,
+    /** Where exactly the trip leaves from: the platform or bay of [stopId], if known. */
+    val stopLocation: LatLon? = null,
 ) {
     val time: Instant get() = estimated ?: scheduled
     val isRealtime: Boolean get() = estimated != null

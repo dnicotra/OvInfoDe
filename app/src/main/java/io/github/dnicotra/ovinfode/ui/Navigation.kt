@@ -22,6 +22,8 @@ import io.github.dnicotra.ovinfode.ui.departures.DeparturesScreen
 import io.github.dnicotra.ovinfode.ui.departures.DeparturesViewModel
 import io.github.dnicotra.ovinfode.ui.home.HomeScreen
 import io.github.dnicotra.ovinfode.ui.home.HomeViewModel
+import io.github.dnicotra.ovinfode.ui.map.StopMapScreen
+import io.github.dnicotra.ovinfode.ui.map.StopMapViewModel
 import io.github.dnicotra.ovinfode.ui.search.SearchScreen
 import io.github.dnicotra.ovinfode.ui.search.SearchViewModel
 import io.github.dnicotra.ovinfode.ui.trip.TripScreen
@@ -51,6 +53,21 @@ data class DeparturesRoute(
 
 fun Stop.toRoute() = DeparturesRoute(id, name, lat, lon, area, modes.map { it.name })
 
+/** A stop on the map, with its platforms. */
+@Serializable
+data class StopMapRoute(
+    val id: String,
+    val name: String,
+    val lat: Double,
+    val lon: Double,
+    val area: String? = null,
+    val modes: List<String> = emptyList(),
+) {
+    fun toStop() = DeparturesRoute(id, name, lat, lon, area, modes).toStop()
+}
+
+fun Stop.toMapRoute() = StopMapRoute(id, name, lat, lon, area, modes.map { it.name })
+
 @Serializable
 data class TripRoute(
     val tripId: String,
@@ -78,6 +95,17 @@ private fun NavController.openStop(stop: Stop) {
         previousBackStackEntry?.showsStop() == true -> popBackStack()
         else -> navigate(stop.toRoute())
     }
+}
+
+/**
+ * Shows the board of [stop] instead of the current one (another stop of the same place), so
+ * that going back leaves the place rather than stepping through its stops.
+ */
+private fun NavController.switchStop(stop: Stop) {
+    val current = currentBackStackEntry ?: return
+    if (current.lifecycle.currentState != Lifecycle.State.RESUMED) return
+    if (current.destination.hasRoute<DeparturesRoute>() && current.toRoute<DeparturesRoute>().id == stop.id) return
+    navigate(stop.toRoute()) { popUpTo<DeparturesRoute> { inclusive = true } }
 }
 
 private fun NavController.backSafely() {
@@ -120,6 +148,16 @@ fun AppNavHost(container: AppContainer) {
                 viewModel = viewModel { DeparturesViewModel(container, stop) },
                 onBack = { nav.backSafely() },
                 onOpenTrip = { nav.navigateSafely(it.toTripRoute()) },
+                onOpenStop = { nav.openStop(it) },
+                onSwitchStop = { nav.switchStop(it) },
+                onOpenMap = { nav.navigateSafely(it.toMapRoute()) },
+            )
+        }
+        composable<StopMapRoute> { entry ->
+            val stop = entry.toRoute<StopMapRoute>().toStop()
+            StopMapScreen(
+                viewModel = viewModel { StopMapViewModel(container, stop) },
+                onBack = { nav.backSafely() },
                 onOpenStop = { nav.openStop(it) },
             )
         }

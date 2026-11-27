@@ -88,10 +88,10 @@
 
     <!-- Attribution / about -->
     <string name="attribution">Gegevens: Transitous · © OpenStreetMap-bijdragers</string>
-    <string name="about_description">Actuele vertrektijden van bus, tram, metro en trein in Nederland, België, Duitsland, Italië en Luxemburg (en daarbuiten): haltes in de buurt, favorieten, vertragingen en uitval in één oogopslag.</string>
+    <string name="about_description">Actuele vertrektijden van bus, tram, metro en trein in Nederland, België, Duitsland, Frankrijk, Italië en Luxemburg (en daarbuiten): haltes in de buurt, favorieten, vertragingen en uitval in één oogopslag.</string>
     <string name="about_version">Versie %1$s</string>
     <string name="about_data_title">Gegevensbronnen</string>
-    <string name="about_data_text">Dienstregelingen en actuele gegevens komen van Transitous, een gratis openbaarvervoerdienst die door vrijwilligers wordt beheerd. Voor Nederland gebruikt Transitous de landelijke dienstregeling en actuele gegevens van OpenOV, voor België die van NMBS, MIVB, De Lijn en TEC, voor Duitsland die van DELFI, voor Italië die van Trenitalia, Trenord en de regionale en stedelijke vervoerders (veel via BusOne), voor Luxemburg de landelijke dienstregeling van de Administration des transports publics (zonder actuele gegevens). Haltes en kaarten zijn gebaseerd op OpenStreetMap.</string>
+    <string name="about_data_text">Dienstregelingen en actuele gegevens komen van Transitous, een gratis openbaarvervoerdienst die door vrijwilligers wordt beheerd. Voor Nederland gebruikt Transitous de landelijke dienstregeling en actuele gegevens van OpenOV, voor België die van NMBS, MIVB, De Lijn en TEC, voor Frankrijk die van SNCF, Île-de-France Mobilités en de regionale en stedelijke vervoerders, voor Duitsland die van DELFI, voor Italië die van Trenitalia, Trenord en de regionale en stedelijke vervoerders (veel via BusOne), voor Luxemburg de landelijke dienstregeling van de Administration des transports publics (zonder actuele gegevens). Haltes en kaarten zijn gebaseerd op OpenStreetMap.</string>
     <string name="about_link_sources">Gegevensbronnen en licenties van Transitous</string>
     <string name="about_link_osm">Auteursrecht van OpenStreetMap</string>
     <string name="about_link_donate">Steun Transitous met een donatie</string>
@@ -104,4 +104,16 @@
     <string name="about_legend_ontime">Groen: op tijd (actuele gegevens)</string>
     <string name="about_legend_delayed">Rood: vertraagd, rijdt niet of spoorwijziging</string>
     <string name="about_legend_schedule">Neutraal: alleen dienstregeling, geen actuele gegevens</string>
+    <!-- Stop map and stops of the same place -->
+    <string name="stop_on_map">Op de kaart tonen</string>
+    <string name="similar_stops">Ook hier</string>
+    <string name="similar_stop_chip">%1$s · %2$d m</string>
+    <string name="directions">Route</string>
+    <string name="map_platforms">Sporen en perrons</string>
+    <string name="map_platform_lines">Lijnen: %1$s</string>
+    <string name="map_whole_stop">Hele halte</string>
+    <string name="map_no_platforms">De dienstregeling zegt niet waar de perrons liggen.</string>
+    <string name="map_attribution">Kaart © OpenStreetMap-bijdragers</string>
+    <string name="no_map_app">Geen app voor routes gevonden</string>
+    <string name="map_other_stop">Ook hier: %1$s</string>
 </resources>

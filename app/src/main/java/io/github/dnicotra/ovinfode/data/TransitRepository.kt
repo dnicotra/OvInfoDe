@@ -17,6 +17,8 @@ import io.github.dnicotra.ovinfode.util.boundingBox
 import io.github.dnicotra.ovinfode.util.distanceMeters
 import io.github.dnicotra.ovinfode.util.placeKey
 import io.github.dnicotra.ovinfode.util.qualifyName
+import io.github.dnicotra.ovinfode.util.SIMILAR_STOP_METERS
+import io.github.dnicotra.ovinfode.util.similarStopsNearby
 import kotlinx.serialization.SerializationException
 import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
@@ -82,7 +84,37 @@ class TransitRepository(
         if (boardLocations.size > MAX_BOARD_LOCATIONS) boardLocations.clear()
         boardLocations[stop.id] = stop.location
         result.departures.forEach { departure -> departure.stopId?.let { boardLocations[it] = stop.location } }
-        return result.copy(departures = withTowns(result.departures, contextStopId = stop.id))
+        val board = result.copy(departures = withTowns(result.departures, contextStopId = stop.id))
+        if (pageCursor == null) synchronized(recentBoards) { recentBoards[stop.id] = board }
+        return board
+    }
+
+    /** Recently loaded first pages of departure boards, by stop id: the map shows their platforms without asking again. */
+    private val recentBoards = object : LinkedHashMap<String, StopDepartures>(16, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, StopDepartures>) = size > MAX_RECENT_BOARDS
+    }
+
+    /** The departures of [stop] for its map: the board loaded last, else asked for now. */
+    suspend fun departuresForMap(stop: Stop): StopDepartures =
+        synchronized(recentBoards) { recentBoards[stop.id] } ?: departures(stop, MAP_DEPARTURES)
+
+    private val similarStopsCache = ConcurrentHashMap<String, List<NearbyStop>>()
+
+    /**
+     * Stops of the same place as [stop] that the timetables keep apart: close by and with a
+     * similar name ("Gare de Lyon" for the Paris metro and RER, "Paris Gare de Lyon" for SNCF).
+     * See [similarStopsNearby].
+     */
+    suspend fun similarStops(stop: Stop): List<NearbyStop> {
+        similarStopsCache[stop.id]?.let { return it }
+        val (min, max) = boundingBox(stop.location, SIMILAR_STOP_METERS)
+        val candidates = api.mapStops(min, max, language = languageAt(stop.location, stop.country()))
+            .filter { it.stopId != null }
+            .map { it.toStop() }
+        val result = similarStopsNearby(stop, candidates)
+        if (similarStopsCache.size > MAX_BOARD_LOCATIONS) similarStopsCache.clear()
+        similarStopsCache[stop.id] = result
+        return result
     }
 
     /** A trip with all its stops; [contextStopId] is the stop the user came from. */
@@ -123,6 +155,8 @@ class TransitRepository(
 
 private const val MAX_BOARD_LOCATIONS = 2000
 private const val SAME_STOP_METERS = 300
+private const val MAX_RECENT_BOARDS = 8
+private const val MAP_DEPARTURES = 60
 
 /** Runs [block], turning failures (but not cancellation) into a [Result]. */
 suspend fun <T> safeCall(block: suspend () -> T): Result<T> = try {

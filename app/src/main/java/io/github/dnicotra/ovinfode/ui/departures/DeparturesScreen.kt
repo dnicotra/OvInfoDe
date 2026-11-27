@@ -19,10 +19,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.DepartureBoard
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -52,6 +54,7 @@ import io.github.dnicotra.ovinfode.country.Country
 import io.github.dnicotra.ovinfode.country.country
 import io.github.dnicotra.ovinfode.data.DepartureViewMode
 import io.github.dnicotra.ovinfode.data.model.Departure
+import io.github.dnicotra.ovinfode.data.model.NearbyStop
 import io.github.dnicotra.ovinfode.data.model.Stop
 import io.github.dnicotra.ovinfode.data.model.TransportMode
 import io.github.dnicotra.ovinfode.ui.components.AlertsCard
@@ -76,6 +79,8 @@ fun DeparturesScreen(
     onBack: () -> Unit,
     onOpenTrip: (Departure) -> Unit,
     onOpenStop: (Stop) -> Unit,
+    onSwitchStop: (Stop) -> Unit = onOpenStop,
+    onOpenMap: (Stop) -> Unit = {},
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val isFavorite by viewModel.isFavorite.collectAsStateWithLifecycle()
@@ -100,6 +105,8 @@ fun DeparturesScreen(
         onLoadMore = viewModel::loadMore,
         onOpenTrip = onOpenTrip,
         onOpenStop = onOpenStop,
+        onSwitchStop = onSwitchStop,
+        onOpenMap = onOpenMap,
     )
 }
 
@@ -118,6 +125,8 @@ fun DeparturesContent(
     onLoadMore: () -> Unit,
     onOpenTrip: (Departure) -> Unit,
     onOpenStop: (Stop) -> Unit = {},
+    onSwitchStop: (Stop) -> Unit = onOpenStop,
+    onOpenMap: (Stop) -> Unit = {},
 ) {
     Scaffold(
         topBar = {
@@ -134,6 +143,9 @@ fun DeparturesContent(
                     IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back)) }
                 },
                 actions = {
+                    IconButton(onClick = { onOpenMap(state.stop) }) {
+                        Icon(Icons.Filled.Map, contentDescription = stringResource(R.string.stop_on_map))
+                    }
                     IconButton(onClick = onToggleFavorite) {
                         if (isFavorite) {
                             Icon(Icons.Filled.Star, contentDescription = stringResource(R.string.favorite_remove), tint = MaterialTheme.colorScheme.secondary)
@@ -155,7 +167,7 @@ fun DeparturesContent(
             when {
                 state.loading && state.departures.isEmpty() -> LoadingIndicator()
                 state.error != null && state.departures.isEmpty() -> ErrorMessage(state.error, onRetry = onRefresh)
-                else -> DepartureList(state, viewMode, now, onFilter, onViewMode, onLoadMore, onOpenTrip, onOpenStop)
+                else -> DepartureList(state, viewMode, now, onFilter, onViewMode, onLoadMore, onOpenTrip, onOpenStop, onSwitchStop)
             }
         }
     }
@@ -171,6 +183,7 @@ private fun DepartureList(
     onLoadMore: () -> Unit,
     onOpenTrip: (Departure) -> Unit,
     onOpenStop: (Stop) -> Unit,
+    onSwitchStop: (Stop) -> Unit,
 ) {
     val departures = state.visibleDepartures.upcoming(now)
     // Big stations bundle several stops (e.g. the bus station next to the main station):
@@ -185,6 +198,9 @@ private fun DepartureList(
                 if (state.availableModes.size > 1) {
                     val country = remember(state.stop.id) { state.stop.country() }
                     ModeFilterRow(state.availableModes, country, state.filter, onFilter, Modifier.padding(top = 8.dp))
+                }
+                if (state.similarStops.isNotEmpty()) {
+                    SimilarStopsRow(state.similarStops, onSwitchStop, Modifier.padding(top = 8.dp))
                 }
             }
         }
@@ -255,6 +271,32 @@ private fun ModeFilterRow(
                 label = { Text(stringResource(mode.labelRes(country))) },
                 leadingIcon = { Icon(mode.icon(), contentDescription = null, modifier = Modifier.size(FilterChipDefaults.IconSize)) },
             )
+        }
+    }
+}
+
+/** The other stops of this place ("Paris Gare de Lyon" next to "Gare de Lyon"): one tap shows their board instead. */
+@Composable
+private fun SimilarStopsRow(stops: List<NearbyStop>, onSwitchStop: (Stop) -> Unit, modifier: Modifier = Modifier) {
+    Column(modifier) {
+        Text(
+            stringResource(R.string.similar_stops),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Row(
+            modifier = Modifier.horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            stops.forEach { nearby ->
+                AssistChip(
+                    onClick = { onSwitchStop(nearby.stop) },
+                    label = { Text(stringResource(R.string.similar_stop_chip, nearby.stop.name, nearby.distanceMeters), maxLines = 1) },
+                    leadingIcon = nearby.stop.modes.firstOrNull()?.let { mode ->
+                        { Icon(mode.icon(), contentDescription = null, modifier = Modifier.size(FilterChipDefaults.IconSize)) }
+                    },
+                )
+            }
         }
     }
 }

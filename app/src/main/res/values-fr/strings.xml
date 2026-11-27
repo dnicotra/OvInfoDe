@@ -89,10 +89,10 @@
 
     <!-- Attribution / about -->
     <string name="attribution">Données : Transitous · © les contributeurs d’OpenStreetMap</string>
-    <string name="about_description">Les prochains départs des bus, trams, métros et trains en Allemagne, aux Pays-Bas, en Belgique, en Italie et au Luxembourg (et au-delà) : arrêts à proximité, favoris, retards et suppressions en un coup d’œil.</string>
+    <string name="about_description">Les prochains départs des bus, trams, métros et trains en Allemagne, aux Pays-Bas, en Belgique, en France, en Italie et au Luxembourg (et au-delà) : arrêts à proximité, favoris, retards et suppressions en un coup d’œil.</string>
     <string name="about_version">Version %1$s</string>
     <string name="about_data_title">Sources des données</string>
-    <string name="about_data_text">Les horaires et les données en temps réel sont fournis par Transitous, un service de transport public libre et gratuit, géré par des bénévoles. Pour l’Allemagne, il utilise les horaires et le temps réel nationaux de DELFI, pour les Pays-Bas ceux d’OpenOV, pour la Belgique ceux de la SNCB, de la STIB, de De Lijn et du TEC, pour l’Italie ceux de Trenitalia, de Trenord et des réseaux régionaux et urbains (beaucoup via BusOne), pour le Luxembourg les horaires nationaux de l’Administration des transports publics (sans temps réel). Les arrêts et les cartes sont basés sur OpenStreetMap.</string>
+    <string name="about_data_text">Les horaires et les données en temps réel sont fournis par Transitous, un service de transport public libre et gratuit, géré par des bénévoles. Pour l’Allemagne, il utilise les horaires et le temps réel nationaux de DELFI, pour les Pays-Bas ceux d’OpenOV, pour la Belgique ceux de la SNCB, de la STIB, de De Lijn et du TEC, pour la France ceux de la SNCF, d’Île-de-France Mobilités et des réseaux régionaux et urbains, pour l’Italie ceux de Trenitalia, de Trenord et des réseaux régionaux et urbains (beaucoup via BusOne), pour le Luxembourg les horaires nationaux de l’Administration des transports publics (sans temps réel). Les arrêts et les cartes sont basés sur OpenStreetMap.</string>
     <string name="about_link_sources">Sources des données et licences de Transitous</string>
     <string name="about_link_osm">Droits d’auteur OpenStreetMap</string>
     <string name="about_link_donate">Soutenir Transitous par un don</string>
@@ -105,4 +105,16 @@
     <string name="about_legend_ontime">Vert : à l’heure (données en temps réel)</string>
     <string name="about_legend_delayed">Rouge : en retard, supprimé ou changement de voie</string>
     <string name="about_legend_schedule">Neutre : horaires théoriques, sans temps réel</string>
+    <!-- Stop map and stops of the same place -->
+    <string name="stop_on_map">Afficher sur la carte</string>
+    <string name="similar_stops">Aussi ici</string>
+    <string name="similar_stop_chip">%1$s · %2$d m</string>
+    <string name="directions">Itinéraire</string>
+    <string name="map_platforms">Voies et quais</string>
+    <string name="map_platform_lines">Lignes : %1$s</string>
+    <string name="map_whole_stop">Tout l’arrêt</string>
+    <string name="map_no_platforms">Les horaires n’indiquent pas où se trouvent les quais.</string>
+    <string name="map_attribution">Carte © les contributeurs d’OpenStreetMap</string>
+    <string name="no_map_app">Aucune application d’itinéraire trouvée</string>
+    <string name="map_other_stop">Aussi ici : %1$s</string>
 </resources>

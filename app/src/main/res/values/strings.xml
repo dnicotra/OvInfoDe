@@ -76,6 +76,7 @@
     <string name="mode_train">Train</string>
     <string name="mode_suburban">Suburban rail</string>
     <string name="mode_suburban_de">S-Bahn</string>
+    <string name="mode_suburban_fr" translatable="false">RER/Transilien</string>
     <string name="mode_subway">Metro</string>
     <string name="mode_subway_de">U-Bahn</string>
     <string name="mode_tram">Tram</string>
@@ -88,10 +89,10 @@
 
     <!-- Attribution / about -->
     <string name="attribution">Data: Transitous · © OpenStreetMap contributors</string>
-    <string name="about_description">Live departures for buses, trams, metros and trains in Germany, the Netherlands, Belgium, Italy and Luxembourg (and beyond): nearby stops, favourites, delays and cancellations at a glance.</string>
+    <string name="about_description">Live departures for buses, trams, metros and trains in Germany, the Netherlands, Belgium, France, Italy and Luxembourg (and beyond): nearby stops, favourites, delays and cancellations at a glance.</string>
     <string name="about_version">Version %1$s</string>
     <string name="about_data_title">Data sources</string>
-    <string name="about_data_text">Timetables and real-time data are provided by Transitous, a free, community-run public transport service. For Germany it uses the nationwide DELFI timetables and real-time feeds, for the Netherlands those of OpenOV, for Belgium those of SNCB, STIB, De Lijn and TEC, for Italy those of Trenitalia, Trenord and the regional and city operators (many via BusOne), for Luxembourg the national timetable of the Administration des transports publics (without real-time data). Stops and maps are based on OpenStreetMap.</string>
+    <string name="about_data_text">Timetables and real-time data are provided by Transitous, a free, community-run public transport service. For Germany it uses the nationwide DELFI timetables and real-time feeds, for the Netherlands those of OpenOV, for Belgium those of SNCB, STIB, De Lijn and TEC, for France those of SNCF, Île-de-France Mobilités and the regional and city networks, for Italy those of Trenitalia, Trenord and the regional and city operators (many via BusOne), for Luxembourg the national timetable of the Administration des transports publics (without real-time data). Stops and maps are based on OpenStreetMap.</string>
     <string name="about_link_sources">Transitous data sources and licences</string>
     <string name="about_link_osm">OpenStreetMap copyright</string>
     <string name="about_link_donate">Support Transitous with a donation</string>
@@ -104,4 +105,16 @@
     <string name="about_legend_ontime">Green: on time (real-time data)</string>
     <string name="about_legend_delayed">Red: delayed, cancelled or platform changed</string>
     <string name="about_legend_schedule">Neutral: timetable only, no real-time data</string>
+    <!-- Stop map and stops of the same place -->
+    <string name="stop_on_map">Show on map</string>
+    <string name="similar_stops">Also here</string>
+    <string name="similar_stop_chip">%1$s · %2$d m</string>
+    <string name="directions">Directions</string>
+    <string name="map_platforms">Platforms and stops</string>
+    <string name="map_platform_lines">Lines: %1$s</string>
+    <string name="map_whole_stop">Whole stop</string>
+    <string name="map_no_platforms">The timetable does not say where the platforms are.</string>
+    <string name="map_attribution">Map © OpenStreetMap contributors</string>
+    <string name="no_map_app">No app for directions found</string>
+    <string name="map_other_stop">Also here: %1$s</string>
 </resources>

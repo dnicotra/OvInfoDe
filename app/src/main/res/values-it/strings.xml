@@ -88,10 +88,10 @@
 
     <!-- Attribution / about -->
     <string name="attribution">Dati: Transitous · © collaboratori di OpenStreetMap</string>
-    <string name="about_description">Partenze in tempo reale di bus, tram, metro e treni in Italia, Germania, Paesi Bassi e Lussemburgo (e non solo): fermate vicine, preferiti, ritardi e soppressioni a colpo d\'occhio.</string>
+    <string name="about_description">Partenze in tempo reale di bus, tram, metro e treni in Italia, Germania, Francia, Belgio, Paesi Bassi e Lussemburgo (e non solo): fermate vicine, preferiti, ritardi e soppressioni a colpo d\'occhio.</string>
     <string name="about_version">Versione %1$s</string>
     <string name="about_data_title">Fonti dei dati</string>
-    <string name="about_data_text">Orari e dati in tempo reale sono forniti da Transitous, un servizio di trasporto pubblico gratuito gestito da volontari. Per l\'Italia Transitous usa gli orari di Trenitalia, Trenord e delle aziende regionali e cittadine (molti tramite BusOne), per la Germania quelli di DELFI, per i Paesi Bassi quelli di OpenOV, per il Lussemburgo l\'orario nazionale dell\'Administration des transports publics (senza tempo reale). Fermate e mappe si basano su OpenStreetMap.</string>
+    <string name="about_data_text">Orari e dati in tempo reale sono forniti da Transitous, un servizio di trasporto pubblico gratuito gestito da volontari. Per l\'Italia Transitous usa gli orari di Trenitalia, Trenord e delle aziende regionali e cittadine (molti tramite BusOne), per la Germania quelli di DELFI, per i Paesi Bassi quelli di OpenOV, per la Francia quelli di SNCF, Île-de-France Mobilités e delle reti regionali e urbane, per il Lussemburgo l\'orario nazionale dell\'Administration des transports publics (senza tempo reale). Fermate e mappe si basano su OpenStreetMap.</string>
     <string name="about_link_sources">Fonti dei dati e licenze di Transitous</string>
     <string name="about_link_osm">Copyright di OpenStreetMap</string>
     <string name="about_link_donate">Sostieni Transitous con una donazione</string>
@@ -104,4 +104,16 @@
     <string name="about_legend_ontime">Verde: in orario (dati in tempo reale)</string>
     <string name="about_legend_delayed">Rosso: in ritardo, soppresso o cambio binario</string>
     <string name="about_legend_schedule">Neutro: solo orario, nessun dato in tempo reale</string>
+    <!-- Stop map and stops of the same place -->
+    <string name="stop_on_map">Mostra sulla mappa</string>
+    <string name="similar_stops">Anche qui</string>
+    <string name="similar_stop_chip">%1$s · %2$d m</string>
+    <string name="directions">Percorso</string>
+    <string name="map_platforms">Binari e fermate</string>
+    <string name="map_platform_lines">Linee: %1$s</string>
+    <string name="map_whole_stop">Tutta la fermata</string>
+    <string name="map_no_platforms">L\'orario non indica dove si trovano i binari.</string>
+    <string name="map_attribution">Mappa © contributori di OpenStreetMap</string>
+    <string name="no_map_app">Nessuna app per i percorsi trovata</string>
+    <string name="map_other_stop">Anche qui: %1$s</string>
 </resources>

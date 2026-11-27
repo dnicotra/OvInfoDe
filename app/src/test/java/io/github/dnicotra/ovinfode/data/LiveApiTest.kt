@@ -1,6 +1,7 @@
 package io.github.dnicotra.ovinfode.data
 
 import io.github.dnicotra.ovinfode.country.Belgium
+import io.github.dnicotra.ovinfode.country.France
 import io.github.dnicotra.ovinfode.country.Italy
 import io.github.dnicotra.ovinfode.country.Luxembourg
 import io.github.dnicotra.ovinfode.country.Netherlands
@@ -341,5 +342,37 @@ class LiveApiTest {
         val nearby = repository.nearbyStops(LatLon(50.9420, 6.9580))
         println("nearby: " + nearby.joinToString { "${it.stop.name} ${it.distanceMeters} m" })
         assertTrue(nearby.any { it.stop.name.contains("Dom") || it.stop.name.contains("Hbf") })
+    }
+
+    @Test
+    fun `french departure boards read like the station boards`() = runBlocking {
+        val problems = mutableListOf<String>()
+        val french = TransitRepository(TransitousApi(userAgent = "Abfahrten-tests/0.1"), userLanguage = { "fr" })
+        val stations = listOf(
+            "Paris Gare de Lyon", "Châtelet", "Paris Gare du Nord", "Lyon Part Dieu", "Marseille Saint-Charles",
+            "Toulouse Matabiau", "Bordeaux Saint-Jean", "Lille Flandres", "Strasbourg", "Nantes Commerce", "Reims Opéra",
+        )
+        val shouting = Regex("""\p{Lu}{4,}""")
+        for (query in stations) {
+            val stop = french.searchStops(query, near = null).firstOrNull { it.country() == France }
+            if (stop == null) {
+                problems += "$query: not found"
+                continue
+            }
+            val departures = french.departures(stop, count = 30).departures
+            val realtime = if (departures.isEmpty()) 0 else departures.count { it.isRealtime } * 100 / departures.size
+            println(String.format("%-30s %3d departures  %3d%% real-time  lines %s", stop.name.take(30), departures.size, realtime,
+                departures.map { it.line.name }.distinct().take(12)))
+            println("    " + departures.map { it.headsign }.distinct().take(12).joinToString(" | "))
+            if (departures.isEmpty()) problems += "${stop.name}: no departures"
+            for (d in departures) {
+                if (d.headsign.isBlank()) problems += "${stop.name}: ${d.line.name} without destination"
+                if (Regex("""^(?:[A-Z]{4}|\d+)$""").matches(d.headsign)) problems += "${stop.name}: ${d.line.name} → mission code ${d.headsign}"
+                if (shouting.containsMatchIn(d.headsign.replace(Regex("""\b(?:SNCF|RER|EHPAD|ENSAM|ASPTT|CPAM|AFPA|INSA)\b"""), ""))) problems += "${stop.name}: '${d.headsign}' in capitals"
+                if ("Hall" in d.headsign) problems += "${stop.name}: '${d.headsign}'"
+                if (d.line.name.length > 9 && "_fr-" in d.tripId) problems += "${stop.name}: line '${d.line.name}'"
+            }
+        }
+        assertTrue(problems.distinct().joinToString("\n"), problems.isEmpty())
     }
 }

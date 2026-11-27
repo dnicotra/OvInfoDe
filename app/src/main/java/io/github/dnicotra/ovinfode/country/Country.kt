@@ -19,7 +19,7 @@ import io.github.dnicotra.ovinfode.util.shortStopName
  * To support another country:
  * 1. add an object like [Netherlands] that overrides what differs from the defaults here,
  * 2. list it in [Countries.all],
- * 3. generate its outline: `python3 tools/country_outlines.py NL DE IT LU BE BE-VLG BE-BRU XX > …/country/CountryOutlines.kt`,
+ * 3. generate its outline: `python3 tools/country_outlines.py NL DE IT LU BE BE-VLG BE-BRU FR XX > …/country/CountryOutlines.kt`,
  * 4. add a `values-xx/strings.xml` translation if it speaks a new language.
  */
 abstract class Country(
@@ -126,7 +126,7 @@ object Countries {
      * Countries with rules of their own. Where outlines overlap at a border, the country of the
      * stop's feed wins, otherwise the first one.
      */
-    val all: List<Country> = listOf(Netherlands, Germany, Italy, Luxembourg, Belgium)
+    val all: List<Country> = listOf(Netherlands, Germany, Italy, Luxembourg, Belgium, France)
 
     fun byCode(code: String?): Country? = code?.let { c -> all.firstOrNull { it.code.equals(c, ignoreCase = true) } }
 
